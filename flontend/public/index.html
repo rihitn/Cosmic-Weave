@@ -4,33 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>三次元空間に星を表示</title>
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-      canvas {
-        display: block;
-      }
-      #url-display {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 10px;
-        background-color: rgba(0, 0, 0, 0.7);
-        color: white;
-        font-size: 16px;
-        border-radius: 5px;
-        visibility: hidden;
-      }
-    </style>
+    <link rel="stylesheet" href="../assets/css/styles.css" />
   </head>
   <header>
-    <h1>CosmicWeave</h1>
+    <div class="header-logo">CosmicWeave</div>
+    <button class="menu-button" onclick="toggleMenu()">URLを追加</button>
   </header>
   <body>
     <div id="url-display">URLが表示されます</div>
+
+    <!-- メニューバー　-->
+    <div class="menu" id="menu">
+      <div class="url-form">
+        <h3>URLを登録</h3>
+        <form action="#" method="POST">
+          <input type="url" name="url" placeholder="URLを入力" required />
+          <input type="submit" value="登録" />
+        </form>
+      </div>
+      <ul>
+        <li>追加されたURL</li>
+      </ul>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
       // シーン、カメラ、レンダラーの作成
@@ -190,6 +186,18 @@
 
       // アニメーション開始
       animate();
+    </script>
+
+    <script>
+      // メニューバーの表示・非表示を切り替える関数
+      function toggleMenu() {
+        const menu = document.getElementById("menu");
+        if (menu.style.display === "block") {
+          menu.style.display = "none"; // 非表示にする
+        } else {
+          menu.style.display = "block"; // 表示する
+        }
+      }
     </script>
   </body>
 </html>
