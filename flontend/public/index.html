@@ -8,15 +8,23 @@
   </head>
   <header>
     <div class="header-logo">CosmicWeave</div>
-    <button class="menu-button" onclick="toggleMenu()">URLを追加</button>
+    <button class="menu-button" onclick="toggleMenu()">メニュー</button>
   </header>
   <body>
     <div id="url-display">URLが表示されます</div>
 
     <!-- メニューバー　-->
     <div class="menu" id="menu">
+      <div class="search-form">
+        <h3>検索(未実装)</h3>
+        <input type="url" placeholder="あああ" />
+        <buttton onclick="">検索</buttton>
+      </div>
       <div class="url-form">
-        <h3>URLを登録</h3>
+        <div class="url-header">
+          <h3>URLを登録</h3>
+          <div class="url-counter"></div>
+        </div>
         <input
           type="url"
           id="url"
@@ -27,8 +35,10 @@
         />
         <button onclick="addUrl()">追加</button>
       </div>
-      <h3>追加されたURL</h3>
-      <ul id="url-list"></ul>
+      <div class="added-urls-list">
+        <h3>追加されたURL</h3>
+        <ul id="url-list"></ul>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.js"></script>

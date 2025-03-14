@@ -55,12 +55,18 @@ async function loadUrls() {
   const urlList = document.getElementById("url-list");
   urlList.innerHTML = "";
 
+  // URLの数を更新
+  const urlCounter = document.querySelector(".url-counter");
+  if (urlCounter) {
+    urlCounter.textContent = `URL数: ${data.length}`;
+  }
+
   // 登録されたURLをリストに表示
   data.forEach((urlRecord) => {
     const li = document.createElement("li");
     li.innerHTML = `
         <a href="${urlRecord.url}" target="_blank">${urlRecord.url}</a>
-        <button onclick="deleteUrl(${urlRecord.id})">削除</button>
+        <button class="delete-button" onclick="deleteUrl(${urlRecord.id})">削除</button>
       `;
     urlList.appendChild(li);
   });
