@@ -21,6 +21,9 @@ async function addUrl() {
   if (!url) {
     alert("URLを入力してください");
     return;
+  } else if (!(url.startsWith("https://") || url.startsWith("http://"))) {
+    alert("URLはhttps://もしくはhttp://で始まる必要があります");
+    return;
   }
 
   // Supabaseにデータを挿入

@@ -46,6 +46,7 @@ header {
   background-color: #333;
   padding-top: 20px; /* 上部の余白 */
   z-index: 1;
+  color: white;
 }
 
 .menu ul {
@@ -62,10 +63,6 @@ header {
   font-size: 18px;
   padding: 10px 20px;
   transition: background-color 0.3s;
-}
-
-.menu ul li a:hover {
-  background-color: #777;
 }
 
 /* ボタンのスタイル */
