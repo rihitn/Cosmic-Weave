@@ -77,6 +77,9 @@ for (let i = 0; i < starData.length; i++) {
 // カメラの位置を設定
 camera.position.z = 100;
 
+// OrbitControlsの設定（カメラ操作）
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
 // マウスクリックによる星の色変更およびURL遷移
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -141,6 +144,9 @@ function animate() {
 
   // シーンを描画
   renderer.render(scene, camera);
+
+  // OrbitControlsの更新
+  controls.update(); // レンダリング前にupdate()が必要
 }
 
 // 画面サイズが変わったときにレンダラーのサイズを更新
