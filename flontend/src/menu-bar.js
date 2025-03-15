@@ -9,9 +9,8 @@ function toggleMenu() {
 }
 
 //supabeseの設定
-const SUPABASE_URL = "https://rpnrxkjywdjuvwqyaxod.supabase.co";
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwbnJ4a2p5d2RqdXZ3cXlheG9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5ODU1NTAsImV4cCI6MjA1NTU2MTU1MH0.5UcsToulrU63XqT21wtGJTy-pjxw-n7MlIuv7EzoP08";
+const SUPABASE_URL = window.ENV.SUPABASE_URL;
+const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 //urlを追加する関数
