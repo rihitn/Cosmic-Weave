@@ -1,6 +1,3 @@
-import sys
-sys.stdout.reconfigure(encoding='utf-8')  # ✅ UTF-8で出力するように修正
-
 import os
 import requests
 from bs4 import BeautifulSoup
