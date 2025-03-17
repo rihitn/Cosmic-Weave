@@ -15,13 +15,13 @@ if not OPENAI_API_KEY:
     raise ValueError("❌ OPENAI_API_KEY が設定されていません！ .env を確認してください。")
 
 # OpenAI クライアントの作成
-client = openai.OpenAI(api_key=OPENAI_API_KEY)  # ✅ 明示的に API キーを渡す
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def fetch_data():
-    """タイトルと本文を取得"""
-    response = supabase.table("websites").select("id, title, content").execute()
+    """埋め込みが未作成のデータのみ取得"""
+    response = supabase.table("websites").select("id, title, content").is_("embedding", None).execute()
     return response.data if response.data else []
 
 def get_embedding(text):
@@ -37,13 +37,17 @@ def update_embedding(id, embedding):
     supabase.table("websites").update({"embedding": embedding}).eq("id", id).execute()
 
 def process_embeddings():
-    """データを取得して埋め込みを作成し、Supabase に保存"""
+    """埋め込みの作成と保存"""
     data = fetch_data()
+    if not data:
+        print("✅ すべてのデータが埋め込み済みです。")
+        return
+
     for item in data:
         text_input = f"{item['title']} {item['content']}"
         embedding = get_embedding(text_input)
         update_embedding(item["id"], embedding)
-        print(f"ID: {item['id']} のベクトルデータをSupabaseに保存")
+        print(f"✅ ID: {item['id']} のベクトルデータをSupabaseに保存")
 
 if __name__ == "__main__":
     process_embeddings()
