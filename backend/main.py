@@ -1,10 +1,13 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 from supabase import create_client, Client
+from dotenv import load_dotenv
 
-# SupabaseのURLとAPIキーを設定
-SUPABASE_URL = "https://rpnrxkjywdjuvwqyaxod.supabase.co"  # 自分のSupabaseプロジェクトURL
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwbnJ4a2p5d2RqdXZ3cXlheG9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5ODU1NTAsImV4cCI6MjA1NTU2MTU1MH0.5UcsToulrU63XqT21wtGJTy-pjxw-n7MlIuv7EzoP08"  # 自分のSupabase APIキー
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # Supabaseクライアントを作成
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
