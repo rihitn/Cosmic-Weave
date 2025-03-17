@@ -27,12 +27,17 @@ async function addUrl() {
 
   // Supabaseにデータを挿入
   const { data, error } = await supabaseClient
-    .from("test")
+    .from("websites")
     .insert([{ url, created_at: new Date() }]);
 
   if (error) {
     console.error(error);
-    alert("URLの追加に失敗しました");
+    // 重複エラーの場合はユーザーフレンドリーなメッセージを表示
+    if (error.code === "23505") {
+      alert("このURLは既に登録されています");
+    } else {
+      alert("URLの追加に失敗しました");
+    }
   } else {
     // フォームをクリアしてメモリストを更新
     document.getElementById("url").value = "";
@@ -42,7 +47,7 @@ async function addUrl() {
 
 // URLをリストとして表示する関数
 async function loadUrls() {
-  const { data, error } = await supabaseClient.from("test").select("*");
+  const { data, error } = await supabaseClient.from("websites").select("*");
 
   if (error) {
     console.error(error);
@@ -74,7 +79,7 @@ async function loadUrls() {
 // URLを削除する関数
 async function deleteUrl(id) {
   const { data, error } = await supabaseClient
-    .from("test")
+    .from("websites")
     .delete()
     .eq("id", id);
 
