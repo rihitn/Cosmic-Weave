@@ -19,7 +19,7 @@ def fetch_html_from_url(url: str) -> str:
         response.raise_for_status()
         return response.text
     except requests.RequestException as e:
-        print(f"❌ URLの取得に失敗しました: {e}")
+        print(f"URLの取得に失敗しました: {e}")
         return ""
 
 def extract_title_and_content(html: str) -> tuple[str, str]:
@@ -43,9 +43,9 @@ def update_supabase_with_extracted_data(row_id: int, title: str, content: str):
     }).eq("id", row_id).execute()
 
     if response.data:
-        print(f"✅ データの保存に成功しました (ID: {row_id})")
+        print(f"データの保存に成功しました (ID: {row_id})")
     else:
-        print(f"❌ データの保存に失敗しました (ID: {row_id}): {response}")
+        print(f"データの保存に失敗しました (ID: {row_id}): {response}")
 
 def main():
     # すでに処理済みでないURLのみ取得（titleがnullのデータ）
@@ -55,18 +55,18 @@ def main():
         for row in response.data:
             row_id = row["id"]
             url = row["url"]
-            print(f"🔍 URLを処理中: {url}")
+            print(f"URLを処理中: {url}")
 
             # HTMLを取得してタイトルと本文を抽出
             html = fetch_html_from_url(url)
             if html:
                 title, content = extract_title_and_content(html)
-                print(f"📌 抽出結果: タイトル: {title}")
+                print(f"抽出結果: タイトル: {title}")
 
                 # Supabaseのwebsitesテーブルを更新
                 update_supabase_with_extracted_data(row_id, title, content)
     else:
-        print("✅ すべてのURLが処理済みです。")
+        print("すべてのURLが処理済みです。")
 
 if __name__ == "__main__":
     main()
