@@ -46,7 +46,7 @@ def update_supabase_with_extracted_data(row_id: int, title: str, content: str):
         print(f"データの保存に成功しました (ID: {row_id})")
     else:
         print(f"データの保存に失敗しました (ID: {row_id}): {response.data}")
-
+        
 def main():
     # SupabaseからURLを取得する
     response = supabase.table("websites").select("id, url").execute()
