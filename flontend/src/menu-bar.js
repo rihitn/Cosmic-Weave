@@ -11,7 +11,10 @@ function toggleMenu() {
 //supabeseの設定
 const SUPABASE_URL = window.ENV.SUPABASE_URL;
 const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 //urlを追加する関数
 async function addUrl() {
@@ -26,7 +29,7 @@ async function addUrl() {
   }
 
   // Supabaseにデータを挿入
-  const { data, error } = await supabaseClient
+  const { data, error } = await window.supabaseClient
     .from("websites")
     .insert([{ url, created_at: new Date() }]);
 
@@ -47,7 +50,9 @@ async function addUrl() {
 
 // URLをリストとして表示する関数
 async function loadUrls() {
-  const { data, error } = await supabaseClient.from("websites").select("*");
+  const { data, error } = await window.supabaseClient
+    .from("websites")
+    .select("*");
 
   if (error) {
     console.error(error);
@@ -70,15 +75,19 @@ async function loadUrls() {
     const li = document.createElement("li");
     li.innerHTML = `
         <a href="${urlRecord.url}" target="_blank">${urlRecord.url}</a>
-        <button class="delete-button" onclick="deleteUrl(${urlRecord.id})">削除</button>
+        <button class="delete-button" data-id="${urlRecord.id}">削除</button>
       `;
+    // 削除ボタンにイベントリスナーを追加
+    li.querySelector(".delete-button").addEventListener("click", function () {
+      deleteUrl(urlRecord.id);
+    });
     urlList.appendChild(li);
   });
 }
 
 // URLを削除する関数
 async function deleteUrl(id) {
-  const { data, error } = await supabaseClient
+  const { data, error } = await window.supabaseClient
     .from("websites")
     .delete()
     .eq("id", id);
