@@ -1,5 +1,7 @@
 // シーン、カメラ、レンダラーの作成
 const scene = new THREE.Scene();
+// 背景色を黒に設定
+scene.background = new THREE.Color(0x000000);
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -29,19 +31,27 @@ const stars = [];
 // 星のデフォルトの色
 const defaultColor = 0xffffff;
 
+// ホバー効果用の円を追跡する変数
+let hoverCircle = null;
+
 // 座標リストから頂点データを作成
 starData.forEach((data, index) => {
   vertices.push(data.position[0], data.position[1], data.position[2]);
 
-  // 星を個別に作成
-  const material = new THREE.PointsMaterial({
+  // 星を球体として作成
+  const starGeometry = new THREE.SphereGeometry(1.2, 16, 16);
+
+  // 環境光の影響を受けないMeshBasicMaterialを使用
+  const material = new THREE.MeshBasicMaterial({
     color: defaultColor,
-    size: 1.5,
   });
-  const starGeometry = new THREE.BufferGeometry().setFromPoints([
-    new THREE.Vector3(...data.position),
-  ]);
-  const star = new THREE.Points(starGeometry, material);
+
+  // メッシュを作成
+  const star = new THREE.Mesh(starGeometry, material);
+
+  // 位置を設定
+  star.position.set(data.position[0], data.position[1], data.position[2]);
+
   scene.add(star);
   stars.push({
     position: new THREE.Vector3(...data.position),
@@ -50,6 +60,48 @@ starData.forEach((data, index) => {
     url: data.url,
   });
 });
+
+// ホバー効果用の白い円を作成する関数
+function createHoverCircle(position) {
+  // 既存のホバー円があれば削除
+  if (hoverCircle) {
+    scene.remove(hoverCircle);
+  }
+
+  // 円のジオメトリを作成（32セグメントの円）
+  const circleGeometry = new THREE.CircleGeometry(3, 32);
+
+  // 円のマテリアルを作成（白色、透明度あり）
+  const circleMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.5,
+  });
+
+  // 円メッシュを作成
+  const circle = new THREE.Mesh(circleGeometry, circleMaterial);
+
+  // 位置を設定
+  circle.position.copy(position);
+
+  // 常にカメラの方を向くようにする
+  circle.lookAt(camera.position);
+
+  // シーンに追加
+  scene.add(circle);
+
+  // 参照を保持
+  hoverCircle = circle;
+}
+
+// ホバー円を削除する関数
+function removeHoverCircle() {
+  if (hoverCircle) {
+    scene.remove(hoverCircle);
+    hoverCircle = null;
+  }
+}
 
 geometry.setAttribute(
   "position",
@@ -82,6 +134,7 @@ const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 // マウスクリックによる星の色変更およびURL遷移
 const raycaster = new THREE.Raycaster();
+// Points.thresholdは使用しないので削除（Meshに対しては不要）
 const mouse = new THREE.Vector2();
 const urlDisplay = document.getElementById("url-display");
 
@@ -94,11 +147,11 @@ window.addEventListener("mousemove", (event) => {
   // レイキャスターを使ってマウスオーバーした星を判定
   raycaster.setFromCamera(mouse, camera);
 
-  // 星をクリックして交差するオブジェクトを取得
+  // 星と交差するオブジェクトを取得
   const intersects = raycaster.intersectObjects(stars.map((s) => s.star));
 
   if (intersects.length > 0) {
-    // クリックした星
+    // ホバーした星
     const star = intersects[0].object;
 
     // 対応するURLを表示
@@ -106,10 +159,14 @@ window.addEventListener("mousemove", (event) => {
     if (starDataItem && starDataItem.url) {
       urlDisplay.textContent = `URL: ${starDataItem.url}`;
       urlDisplay.style.visibility = "visible";
+
+      // ホバー効果を表示
+      createHoverCircle(starDataItem.position);
     }
   } else {
-    // マウスが星に重なっていない場合、URL表示を非表示にする
+    // マウスが星に重なっていない場合、URL表示とホバー効果を非表示にする
     urlDisplay.style.visibility = "hidden";
+    removeHoverCircle();
   }
 });
 
@@ -141,6 +198,11 @@ window.addEventListener("click", (event) => {
 // レンダリングループ
 function animate() {
   requestAnimationFrame(animate);
+
+  // ホバー円があれば、常にカメラに向けて更新
+  if (hoverCircle) {
+    hoverCircle.lookAt(camera.position);
+  }
 
   // シーンを描画
   renderer.render(scene, camera);
