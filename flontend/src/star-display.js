@@ -12,20 +12,10 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// 星の座標と関連URLを指定
-const starData = [
-  { position: [10, 20, -30], url: "https://www.hiroshima-u.ac.jp/" },
-  { position: [-15, -5, 10], url: "https://www.hiroshima-u.ac.jp/" },
-  { position: [25, 15, -10], url: "https://example.com/star3" },
-  { position: [-30, 0, 25], url: "https://example.com/star4" },
-  { position: [5, -25, 15], url: "https://example.com/star5" },
-  { position: [50, 50, 50], url: "https://example.com/star6" },
-  { position: [-40, 10, -50], url: "https://example.com/star7" },
-];
+// menu-bar.jsですでに宣言されているsupabaseClientを使用
 
 // 星のジオメトリとマテリアル
 const geometry = new THREE.BufferGeometry();
-const vertices = [];
 const stars = [];
 
 // 星のデフォルトの色
@@ -34,32 +24,110 @@ const defaultColor = 0xffffff;
 // ホバー効果用の円を追跡する変数
 let hoverCircle = null;
 
-// 座標リストから頂点データを作成
-starData.forEach((data, index) => {
-  vertices.push(data.position[0], data.position[1], data.position[2]);
+// Supabaseからデータを取得して星を生成する関数
+async function fetchStarDataAndCreateStars() {
+  try {
+    const { data, error } = await window.supabaseClient
+      .from("websites")
+      .select("url, mds_coordinates");
 
-  // 星を球体として作成
-  const starGeometry = new THREE.SphereGeometry(1.2, 16, 16);
+    if (error) {
+      console.error("Error fetching data from Supabase:", error);
+      return;
+    }
 
-  // 環境光の影響を受けないMeshBasicMaterialを使用
-  const material = new THREE.MeshBasicMaterial({
-    color: defaultColor,
-  });
+    if (!data || data.length === 0) {
+      console.warn("No star data found in Supabase");
+      return;
+    }
 
-  // メッシュを作成
-  const star = new THREE.Mesh(starGeometry, material);
+    console.log("Fetched star data:", data);
 
-  // 位置を設定
-  star.position.set(data.position[0], data.position[1], data.position[2]);
+    // 頂点データをクリア
+    const vertices = [];
 
-  scene.add(star);
-  stars.push({
-    position: new THREE.Vector3(...data.position),
-    star,
-    material,
-    url: data.url,
-  });
-});
+    // Supabaseから取得したデータを使って星を生成
+    data.forEach((item, index) => {
+      // mds_coordinatesが存在するかチェック
+      if (!item.mds_coordinates) {
+        console.warn(`Star at index ${index} has no coordinates, skipping`);
+        return;
+      }
+
+      // 座標データを取得
+      const originalPosition = item.mds_coordinates;
+
+      // 有効な座標データかチェック
+      if (!Array.isArray(originalPosition) || originalPosition.length !== 3) {
+        console.warn(
+          `Invalid coordinates for star at index ${index}, skipping`
+        );
+        return;
+      }
+
+      // 座標値を100倍する
+      const position = [
+        originalPosition[0] * 100,
+        originalPosition[1] * 100,
+        originalPosition[2] * 100,
+      ];
+
+      // 頂点データに追加
+      vertices.push(position[0], position[1], position[2]);
+
+      // 星を球体として作成
+      const starGeometry = new THREE.SphereGeometry(1.2, 16, 16);
+
+      // 環境光の影響を受けないMeshBasicMaterialを使用
+      const material = new THREE.MeshBasicMaterial({
+        color: defaultColor,
+      });
+
+      // メッシュを作成
+      const star = new THREE.Mesh(starGeometry, material);
+
+      // 位置を設定
+      star.position.set(position[0], position[1], position[2]);
+
+      scene.add(star);
+      stars.push({
+        position: new THREE.Vector3(...position),
+        star,
+        material,
+        url: item.url,
+      });
+    });
+
+    // Buffer geometryを更新
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(vertices, 3)
+    );
+
+    // 各星間に線を表示
+    for (let i = 0; i < stars.length; i++) {
+      for (let j = i + 1; j < stars.length; j++) {
+        const start = stars[i].position;
+        const end = stars[j].position;
+
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+          start,
+          end,
+        ]);
+        const lineMaterial = new THREE.LineBasicMaterial({
+          color: 0x888888,
+          opacity: 0.5,
+          transparent: true,
+        });
+        const line = new THREE.Line(lineGeometry, lineMaterial);
+
+        scene.add(line);
+      }
+    }
+  } catch (error) {
+    console.error("Error in fetchStarDataAndCreateStars:", error);
+  }
+}
 
 // ホバー効果用の白い円を作成する関数
 function createHoverCircle(position) {
@@ -103,29 +171,6 @@ function removeHoverCircle() {
   }
 }
 
-geometry.setAttribute(
-  "position",
-  new THREE.Float32BufferAttribute(vertices, 3)
-);
-
-// 各星間に線を表示
-for (let i = 0; i < starData.length; i++) {
-  for (let j = i + 1; j < starData.length; j++) {
-    const start = new THREE.Vector3(...starData[i].position);
-    const end = new THREE.Vector3(...starData[j].position);
-
-    const lineGeometry = new THREE.BufferGeometry().setFromPoints([start, end]);
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0x888888,
-      opacity: 0.5,
-      transparent: true,
-    });
-    const line = new THREE.Line(lineGeometry, lineMaterial);
-
-    scene.add(line);
-  }
-}
-
 // カメラの位置を設定
 camera.position.z = 100;
 
@@ -134,7 +179,6 @@ const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
 // マウスクリックによる星の色変更およびURL遷移
 const raycaster = new THREE.Raycaster();
-// Points.thresholdは使用しないので削除（Meshに対しては不要）
 const mouse = new THREE.Vector2();
 const urlDisplay = document.getElementById("url-display");
 
@@ -216,6 +260,21 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+});
+
+// DOMが完全に読み込まれた後に初期化
+document.addEventListener("DOMContentLoaded", () => {
+  // 初期化の遅延: supabaseClientが確実に定義されるようにするためのタイムアウト
+  setTimeout(() => {
+    if (window.supabaseClient) {
+      // アプリケーション起動時にデータを取得して星を生成
+      fetchStarDataAndCreateStars();
+    } else {
+      console.error(
+        "supabaseClient is not defined. Please check if menu-bar.js is loaded correctly."
+      );
+    }
+  }, 500); // 500ms待機
 });
 
 // アニメーション開始
