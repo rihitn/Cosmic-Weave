@@ -1,3 +1,6 @@
+import sys
+sys.stdout.reconfigure(encoding='utf-8')  # ✅ UTF-8で出力するように修正
+
 import os
 import numpy as np
 from scipy.spatial.distance import cosine
