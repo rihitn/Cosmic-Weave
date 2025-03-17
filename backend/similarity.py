@@ -11,13 +11,46 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+import json  # 追加
+
 def fetch_vectors():
-    """Supabase からベクトルデータを取得"""
+    """Supabase からベクトルデータを取得し、適切な型に変換"""
     response = supabase.table("websites").select("id, embedding").execute()
+    
     if response.data:
         data = response.data
-        vectors = {item["id"]: np.array(item["embedding"]) for item in data}
+        vectors = {}
+
+        for item in data:
+            emb = item["embedding"]  # embedding の元データ
+            
+            # 型チェック
+            print(f"ID: {item['id']} の embedding 型: {type(emb)}")
+            
+            if emb is None:
+                print(f"⚠️ ID {item['id']} の embedding が None です！スキップします。")
+                continue
+            
+            if isinstance(emb, str):  # 文字列の場合は JSON 変換
+                try:
+                    emb = json.loads(emb)  # JSON 文字列をリストに変換
+                except json.JSONDecodeError:
+                    print(f"⚠️ ID {item['id']} の embedding が JSON 変換できません！スキップします。")
+                    continue
+            
+            if isinstance(emb, list):  # 正しいリスト形式
+                emb = np.array(emb, dtype=np.float32)
+            elif isinstance(emb, np.ndarray):  # 既に ndarray の場合
+                emb = emb.astype(np.float32)
+            else:
+                print(f"⚠️ ID {item['id']} の embedding が未知の型 {type(emb)} です！スキップします。")
+                continue
+            
+            # 正常データのみ登録
+            vectors[item["id"]] = emb
+
         return vectors
+    
     else:
         print("データが見つかりません")
         return {}
@@ -33,7 +66,7 @@ def compute_cosine_similarity(vectors):
     for i in range(len(ids)):
         for j in range(len(ids)):
             if i != j:
-                similarity_matrix[i, j] = 1 - cosine(vec_list[i], vec_list[j])  # 類似度 = 1 - コサイン距離
+                similarity_matrix[i, j] = 1 - cosine(vec_list[i].ravel(), vec_list[j].ravel())  # 修正
 
     return ids, similarity_matrix
 
@@ -51,10 +84,6 @@ def update_mds_coordinates(ids, coords):
             "mds_coordinates": [x, y, z]  # 3D 座標をリストとして保存
         }).eq("id", id).execute()
 
-        if response.status_code == 200:
-            print(f"ID: {id} の MDS 座標を Supabase に保存しました")
-        else:
-            print(f"ID: {id} の MDS 座標の保存に失敗: {response.data}")
 
 # データ取得と類似度計算
 vectors = fetch_vectors()
