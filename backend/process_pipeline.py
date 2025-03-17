@@ -23,7 +23,7 @@ def run_script(script_name):
     except subprocess.CalledProcessError as e:
         return {"status": "error", "output": e.stderr}
 
-@app.route("/process_pipeline", methods=["POST"])
+@app.route("/process_pipeline", methods=["POST", "GET"])
 def process_pipeline():
     """
     Supabase に URL が追加されたら、パイプライン処理を実行。
