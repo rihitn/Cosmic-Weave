@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.spatial.distance import cosine
 from supabase import create_client
-
-import matplotlib.pyplot as plt
 from sklearn.manifold import MDS
 
 # Supabase の設定
@@ -13,10 +11,10 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def fetch_vectors():
     """Supabase からベクトルデータを取得"""
-    response = supabase.table("embeddings").select("id, vector").execute()
+    response = supabase.table("websites").select("id, embedding").execute()
     if response.data:
         data = response.data
-        vectors = {item["id"]: np.array(item["vector"]) for item in data}
+        vectors = {item["id"]: np.array(item["embedding"]) for item in data}
         return vectors
     else:
         print("データが見つかりません")
@@ -37,19 +35,34 @@ def compute_cosine_similarity(vectors):
 
     return ids, similarity_matrix
 
-# データ取得と類似度計算
-vectors = fetch_vectors()
-if vectors:
-    ids, similarity_matrix = compute_cosine_similarity(vectors)
-
 def compute_mds(similarity_matrix, n_components=3):
     """コサイン類似度行列を MDS により 3D 座標へ変換"""
     mds = MDS(n_components=n_components, dissimilarity="precomputed", random_state=42)
     coords = mds.fit_transform(1 - similarity_matrix)  # コサイン類似度を距離として扱うため、1 - 類似度
     return coords
 
-# MDS で 3D 座標取得
+def update_mds_coordinates(ids, coords):
+    """MDS で得た 3D 座標を Supabase に登録"""
+    for i, id in enumerate(ids):
+        x, y, z = coords[i]
+        response = supabase.table("websites").update({
+            "mds_coordinates": [x, y, z]  # 3D 座標をリストとして保存
+        }).eq("id", id).execute()
+
+        if response.status_code == 200:
+            print(f"ID: {id} の MDS 座標を Supabase に保存しました")
+        else:
+            print(f"ID: {id} の MDS 座標の保存に失敗: {response.data}")
+
+# データ取得と類似度計算
+vectors = fetch_vectors()
 if vectors:
+    ids, similarity_matrix = compute_cosine_similarity(vectors)
+
+    # MDS で 3D 座標取得
     coords = compute_mds(similarity_matrix)
 
- 
+    # Supabase に 3D 座標を登録
+    update_mds_coordinates(ids, coords)
+
+    print("MDS 座標の登録が完了しました！")

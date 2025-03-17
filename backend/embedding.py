@@ -2,10 +2,10 @@ import os
 import openai
 from supabase import create_client, Client
 
-SUPABASE_URL = "https://your-supabase-url.supabase.co"
-SUPABASE_KEY = "your-supabase-anon-key"
+SUPABASE_URL = "https://rpnrxkjywdjuvwqyaxod.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwbnJ4a2p5d2RqdXZ3cXlheG9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5ODU1NTAsImV4cCI6MjA1NTU2MTU1MH0.5UcsToulrU63XqT21wtGJTy-pjxw-n7MlIuv7EzoP08"  
 
-openai.api_key = "your-openai-api-key"
+openai.api_key = "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"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
