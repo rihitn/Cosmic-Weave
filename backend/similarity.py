@@ -1,12 +1,14 @@
+import os
 import numpy as np
 from scipy.spatial.distance import cosine
 from supabase import create_client
 from sklearn.manifold import MDS
+from dotenv import load_dotenv
 
-# Supabase の設定
-SUPABASE_URL = "https://rpnrxkjywdjuvwqyaxod.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwbnJ4a2p5d2RqdXZ3cXlheG9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5ODU1NTAsImV4cCI6MjA1NTU2MTU1MH0.5UcsToulrU63XqT21wtGJTy-pjxw-n7MlIuv7EzoP08"
+load_dotenv()
 
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def fetch_vectors():
