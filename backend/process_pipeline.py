@@ -1,6 +1,7 @@
 import os
 import subprocess
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from supabase import create_client
 from dotenv import load_dotenv
 
@@ -12,6 +13,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = Flask(__name__)
+CORS(app)
 
 def run_script(script_name):
     """ 指定されたスクリプトを実行 """
