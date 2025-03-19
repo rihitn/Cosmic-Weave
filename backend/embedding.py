@@ -1,3 +1,11 @@
+import sys
+import codecs
+
+# Windows環境の文字化け対策
+if sys.platform == "win32":
+    import codecs
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+
 import os
 import openai
 from supabase import create_client, Client
