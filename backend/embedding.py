@@ -2,10 +2,6 @@ import os
 import openai
 from supabase import create_client, Client
 from dotenv import load_dotenv
-import sys
-
-# 出力エンコーディングを UTF-8 に設定（Windows の場合）
-sys.stdout.reconfigure(encoding='utf-8')
 
 # .env を読み込む
 load_dotenv(override=True)
