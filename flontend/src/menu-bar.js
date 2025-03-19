@@ -46,6 +46,16 @@ async function addUrl() {
     document.getElementById("url").value = "";
     loadUrls();
   }
+
+  try {
+    const response = await fetch("http://localhost:5000/process_pipeline", {
+      method: "POST",
+    });
+    const result = await response.json();
+    console.log("Pipeline response:", result);
+  } catch (err) {
+    console.error("Pipelineの実行に失敗:", err);
+  }
 }
 
 // URLをリストとして表示する関数
