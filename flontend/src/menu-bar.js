@@ -53,6 +53,11 @@ async function addUrl() {
     });
     const result = await response.json();
     console.log("Pipeline response:", result);
+    if (result.status === "success") {
+      window.location.href = "/flontend/public/index.html"; // :星1:️ ここでリダイレクト
+    } else {
+      alert("パイプラインの実行に失敗しました");
+    }
   } catch (err) {
     console.error("Pipelineの実行に失敗:", err);
   }
