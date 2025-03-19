@@ -2,6 +2,10 @@ import os
 import openai
 from supabase import create_client, Client
 from dotenv import load_dotenv
+import sys
+
+# 出力エンコーディングを UTF-8 に設定（Windows の場合）
+sys.stdout.reconfigure(encoding='utf-8')
 
 # .env を読み込む
 load_dotenv(override=True)
@@ -12,7 +16,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 if not OPENAI_API_KEY:
-    raise ValueError("❌ OPENAI_API_KEY が設定されていません！ .env を確認してください。")
+    raise ValueError("OPENAI_API_KEY が設定されていません！ .env を確認してください。")
 
 # OpenAI クライアントの作成
 client = openai.OpenAI(api_key=OPENAI_API_KEY)
@@ -40,14 +44,14 @@ def process_embeddings():
     """埋め込みの作成と保存"""
     data = fetch_data()
     if not data:
-        print("✅ すべてのデータが埋め込み済みです。")
+        print("すべてのデータが埋め込み済みです。")
         return
 
     for item in data:
         text_input = f"{item['title']} {item['content']}"
         embedding = get_embedding(text_input)
         update_embedding(item["id"], embedding)
-        print(f"✅ ID: {item['id']} のベクトルデータをSupabaseに保存")
+        print(f"ID: {item['id']} のベクトルデータをSupabaseに保存")
 
 if __name__ == "__main__":
     process_embeddings()
