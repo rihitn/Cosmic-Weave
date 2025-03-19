@@ -1,4 +1,5 @@
 import os
+import codecs
 import requests
 import sys
 from bs4 import BeautifulSoup

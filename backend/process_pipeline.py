@@ -18,7 +18,7 @@ CORS(app)
 def run_script(script_name):
     """ 指定されたスクリプトを実行 """
     try:
-        result = subprocess.run(["python", script_name], capture_output=True, text=True, check=True)
+        result = subprocess.run(["python", script_name], capture_output=True, text=True, check=True, encoding="utf-8")
         return {"status": "success", "output": result.stdout}
     except subprocess.CalledProcessError as e:
         return {"status": "error", "output": e.stderr}
