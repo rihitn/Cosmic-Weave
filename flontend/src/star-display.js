@@ -115,7 +115,7 @@ async function fetchStarDataAndCreateStars() {
           end,
         ]);
         const lineMaterial = new THREE.LineBasicMaterial({
-          color: 0x888888,
+          color: 0x444444,
           opacity: 0.5,
           transparent: true,
         });
