@@ -9,8 +9,6 @@ function toggleMenu() {
 }
 
 //supabeseの設定
-const SUPABASE_URL = window.ENV.SUPABASE_URL;
-const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
 window.supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
