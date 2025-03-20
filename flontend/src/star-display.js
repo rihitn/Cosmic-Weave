@@ -29,7 +29,7 @@ async function fetchStarDataAndCreateStars() {
   try {
     const { data, error } = await window.supabaseClient
       .from("websites")
-      .select("url, mds_coordinates");
+      .select("url,title, mds_coordinates");
 
     if (error) {
       console.error("Error fetching data from Supabase:", error);
@@ -95,6 +95,7 @@ async function fetchStarDataAndCreateStars() {
         star,
         material,
         url: item.url,
+        title: item.title,
       });
     });
 
@@ -200,12 +201,27 @@ window.addEventListener("mousemove", (event) => {
 
     // 対応するURLを表示
     const starDataItem = stars.find((s) => s.star === star);
-    if (starDataItem && starDataItem.url) {
-      urlDisplay.textContent = `URL: ${starDataItem.url}`;
+    if (starDataItem) {
+      //title があればそれを表示、なければ URL
+      const displayText =
+        starDataItem.title && starDataItem.title.trim() !== ""
+          ? starDataItem.title
+          : starDataItem.url;
+
+      urlDisplay.textContent = `🔗 ${displayText}`;
       urlDisplay.style.visibility = "visible";
 
-      // ホバー効果を表示
-      createHoverCircle(starDataItem.position);
+      //星のスクリーン座標を取得し、#url-display を星の右側に配置
+      const starPosition = star.position.clone();
+      starPosition.project(camera); // 3D座標をスクリーン座標に変換
+
+      const screenX = (starPosition.x * 0.5 + 0.5) * window.innerWidth;
+      const screenY = (-starPosition.y * 0.5 + 0.5) * window.innerHeight;
+
+      urlDisplay.style.left = `${screenX + 20}px`; // 星の右側に 20px 移動
+      urlDisplay.style.top = `${screenY}px`;
+
+      createHoverCircle(star.position);
     }
   } else {
     // マウスが星に重なっていない場合、URL表示とホバー効果を非表示にする
@@ -225,10 +241,8 @@ window.addEventListener("click", (event) => {
     const star = intersects[0].object;
 
     // 星の色をトグル
-    if (star.material.color.getHex() === 0xff0000) {
-      star.material.color.set(defaultColor);
-    } else {
-      star.material.color.set(0xff0000); // 赤色に変更
+    if (star.material.color.getHex() !== 0xff0000) {
+      star.material.color.set(0xff0000); // 赤色に変更（変更後は戻せない）
     }
 
     // クリックした星に関連付けられたURLに遷移

@@ -88,10 +88,16 @@ async function loadUrls() {
   // 登録されたURLをリストに表示
   data.forEach((urlRecord) => {
     const li = document.createElement("li");
+    const displayText =
+      urlRecord.title && urlRecord.title.trim() !== ""
+        ? urlRecord.title
+        : urlRecord.url;
+
     li.innerHTML = `
-        <a href="${urlRecord.url}" target="_blank">${urlRecord.url}</a>
+        <a href="${urlRecord.url}" target="_blank">${displayText}</a>
         <button class="delete-button" data-id="${urlRecord.id}">削除</button>
       `;
+
     // 削除ボタンにイベントリスナーを追加
     li.querySelector(".delete-button").addEventListener("click", function () {
       deleteUrl(urlRecord.id);
