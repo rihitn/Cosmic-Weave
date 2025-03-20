@@ -20,8 +20,6 @@ steps:
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
-      - '--set-env-vars'
-      - 'PORT=8080'
 
 images:
   - 'gcr.io/cosmic-weave/cosmic-weave'
