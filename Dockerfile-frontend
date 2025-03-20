@@ -2,7 +2,7 @@
 FROM nginx:alpine
 
 # フロントエンドのビルド済みファイルを Nginx にコピー
-COPY frontend/public /usr/share/nginx/html
+COPY flontend/public /usr/share/nginx/html
 
 # Nginx を起動
 CMD ["nginx", "-g", "daemon off;"]
