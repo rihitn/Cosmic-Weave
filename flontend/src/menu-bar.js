@@ -115,7 +115,7 @@ async function addUrl() {
   }
 
   try {
-    const response = await fetch("http://localhost:5000/process_pipeline", {
+    const response = await fetch("https://cosmic-weave-604389536871.us-central1.run.app/process_pipeline", {
       method: "POST",
     });
     const result = await response.json();
