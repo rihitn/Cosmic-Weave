@@ -1,7 +1,7 @@
 steps:
   # 1. Dockerイメージをビルド
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/cosmic-weave/cosmic-weave', '-f', 'Dockerfile', '.']
+    args: ['build', '-t', 'gcr.io/cosmic-weave/cosmic-weave', '-f', 'Dockerfile-backend', '.']
 
   # 2. イメージを Google Container Registry にプッシュ
   - name: 'gcr.io/cloud-builders/docker'
