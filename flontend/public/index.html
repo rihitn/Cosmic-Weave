@@ -17,8 +17,12 @@
     <!-- メニューバー　-->
     <div class="menu" id="menu">
       <div class="search-form">
-        <input type="url" placeholder="検索機能は未実装です" />
-        <button onclick="">検索</button>
+        <input
+          type="text"
+          id="search-input"
+          placeholder="検索キーワードを入力"
+        />
+        <div id="search-results" class="search-results"></div>
       </div>
       <div class="url-form">
         <div class="url-header">

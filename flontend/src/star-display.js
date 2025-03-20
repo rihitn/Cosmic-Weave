@@ -16,10 +16,11 @@ document.body.appendChild(renderer.domElement);
 
 // 星のジオメトリとマテリアル
 const geometry = new THREE.BufferGeometry();
-const stars = [];
+// 星のデータをグローバルに利用できるようにする
+window.stars = [];
 
 // 星のデフォルトの色
-const defaultColor = 0xffffff;
+window.defaultColor = 0xffffff;
 
 // ホバー効果用の円を追跡する変数
 let hoverCircle = null;
