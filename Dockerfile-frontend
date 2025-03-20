@@ -3,7 +3,9 @@ FROM nginx:alpine
 
 COPY flontend/nginx.conf /etc/nginx/conf.d/default.conf
 # フロントエンドのビルド済みファイルを Nginx にコピー
-COPY flontend /usr/share/nginx/html
+COPY public /usr/share/nginx/html
+
+COPY env.js /usr/share/nginx/html/env.js
 
 EXPOSE 8080
 
