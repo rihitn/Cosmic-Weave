@@ -23,3 +23,6 @@ steps:
 
 images:
   - 'gcr.io/cosmic-weave/cosmic-weave'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
