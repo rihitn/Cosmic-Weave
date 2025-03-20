@@ -15,4 +15,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 ENV PORT=8080
 
 # 6. アプリを起動する
+EXPOSE 8080
 CMD ["python", "backend/process_pipeline.py"]
