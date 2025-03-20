@@ -1,7 +1,7 @@
 steps:
   # 1. フロントエンドの Docker イメージをビルド
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/cosmic-weave/flontend', '.']
+    args: ['build', '-t', 'gcr.io/cosmic-weave/flontend', '-f', 'Dockerfile-frontend', '.']
 
   # 2. Google Container Registry にプッシュ
   - name: 'gcr.io/cloud-builders/docker'
