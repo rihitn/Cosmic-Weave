@@ -54,7 +54,7 @@ function highlightStar(url) {
   // 検索に一致する星をハイライト
   const matchingStar = stars.find((starData) => starData.url === url);
   if (matchingStar) {
-    matchingStar.material.color.setHex(0xff0000); // 赤色でハイライト
+    matchingStar.material.color.setHex(0xffff00); // 赤色でハイライト
   }
 }
 
