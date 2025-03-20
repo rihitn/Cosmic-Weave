@@ -161,3 +161,33 @@ a:hover {
 .search-form button:hover {
   background-color: #3a5a8f;
 }
+
+/* 検索結果のスタイル */
+.search-results {
+  display: none;
+  position: absolute;
+  background-color: rgba(66, 66, 66, 0.95);
+  border-radius: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+  z-index: 1000;
+  margin-top: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.search-result-item {
+  padding: 8px 12px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.search-result-item:hover {
+  background-color: rgba(74, 109, 167, 0.5);
+}
+
+/* 検索フォームの位置を相対位置に設定 */
+.search-form {
+  position: relative;
+}
