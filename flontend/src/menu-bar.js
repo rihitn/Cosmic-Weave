@@ -8,6 +8,8 @@ function toggleMenu() {
   }
 }
 
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 //supabeseの設定
 window.supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
