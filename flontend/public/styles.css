@@ -17,23 +17,24 @@ header {
 }
 
 #url-display {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.7); /* 背景を透過 */
+  position: absolute; /* fixed ではなく absolute に変更 */
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.7);
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   border-radius: 5px;
   visibility: hidden;
-  z-index: 2; /* url-displayを前面に配置 */
+  white-space: nowrap; /* テキストを折り返さない */
+  z-index: 10; /* 他の要素より前面に表示 */
+  pointer-events: none; /* ホバー時に干渉しないようにする */
+  border: 1px solid white;
 }
 
 .header-logo {
   float: left;
   font-size: 30px;
   color: white;
+  font-weight: 700;
   padding: 20px 10px 20px 10px;
 }
 
@@ -43,7 +44,7 @@ header {
   right: 0; /* 右側に表示 */
   top: 0;
   height: 100%; /* メニューの高さは画面全体 */
-  width: 300px; /* メニューの固定幅を設定 */
+  width: 350px; /* メニューの固定幅を設定 */
   background-color: rgba(33, 33, 33, 0.8);
   padding-top: 20px; /* 上部の余白 */
   z-index: 1;
@@ -68,7 +69,7 @@ header {
 .search-form {
   margin: 20px 15px;
   padding: 15px;
-  background-color: #444;
+  background-color: rgba(66, 66, 66, 0.7);
   border-radius: 8px;
 }
 
@@ -103,10 +104,6 @@ a {
 
 a:hover {
   text-decoration: underline;
-}
-
-a:visited {
-  color: cornflowerblue;
 }
 
 .menu-button:hover {
