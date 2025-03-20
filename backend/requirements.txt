@@ -1,7 +1,0 @@
-flask
-flask-cors
-requests
-supabase
-openai
-bs4
-python-dotenv
