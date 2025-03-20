@@ -1,6 +1,6 @@
 import os
 import subprocess
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_cors import CORS
 from supabase import create_client
 from dotenv import load_dotenv
@@ -10,18 +10,36 @@ load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+# 環境変数が正しく設定されているか確認
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("Supabase の環境変数が正しく設定されていません！")
+
+# Supabase クライアントの作成
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = Flask(__name__)
 CORS(app)
 
 def run_script(script_name):
-    """ 指定されたスクリプトを実行 """
+    """ 指定されたスクリプトを実行（リアルタイムでログを出力） """
     try:
-        result = subprocess.run(["python", script_name], capture_output=True, text=True, check=True, encoding="utf-8")
-        return {"status": "success", "output": result.stdout}
-    except subprocess.CalledProcessError as e:
-        return {"status": "error", "output": e.stderr}
+        process = subprocess.Popen(
+            ["python", script_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8"
+        )
+        stdout, stderr = process.communicate()
+
+        if process.returncode == 0:
+            return {"status": "success", "output": stdout}
+        else:
+            return {"status": "error", "output": stderr}
+
+    except Exception as e:
+        return {"status": "error", "output": str(e)}
 
 @app.route("/process_pipeline", methods=["POST", "GET"])
 def process_pipeline():
@@ -33,7 +51,7 @@ def process_pipeline():
         # Supabase から新しい URL を取得
         response = supabase.table("websites").select("id, url").order("created_at", desc=True).limit(1).execute()
         
-        if not response.data:
+        if not response or not response.data or len(response.data) == 0:
             return jsonify({"status": "error", "message": "No new URL found in database"}), 400
 
         new_url_id = response.data[0]["id"]
@@ -69,6 +87,5 @@ def process_pipeline():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))  # ← ここでPORTを環境変数から取得
-    app.run(host="0.0.0.0", port=port)
-
+    port = int(os.environ.get("PORT", 8080))  # Cloud Run 互換のためのポート設定
+    app.run(host="0.0.0.0", port=port, debug=True)
