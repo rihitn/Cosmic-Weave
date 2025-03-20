@@ -1,9 +1,9 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/cosmic-weave/flontend', '-f', 'Dockerfile-frontend', '.']
+    args: ['build', '-t', 'gcr.io/cosmic-weave/flontend/public', '-f', 'Dockerfile-frontend', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/cosmic-weave/flontend']
+    args: ['push', 'gcr.io/cosmic-weave/flontend/public']
 
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
@@ -11,12 +11,13 @@ steps:
       - 'deploy'
       - 'flontend'
       - '--image'
-      - 'gcr.io/cosmic-weave/flontend'
+      - 'gcr.io/cosmic-weave/flontend/public'
       - '--region'
       - 'us-central1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
+      - '--port=8080'
 
 images:
-  - 'gcr.io/cosmic-weave/flontend'
+  - 'gcr.io/cosmic-weave/flontend/public'

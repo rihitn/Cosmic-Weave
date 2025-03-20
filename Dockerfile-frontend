@@ -1,8 +1,12 @@
 # 軽量の Nginx を使用
 FROM nginx:alpine
 
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+
 # フロントエンドのビルド済みファイルを Nginx にコピー
 COPY flontend/public /usr/share/nginx/html
+
+EXPOSE 8080
 
 # Nginx を起動
 CMD ["nginx", "-g", "daemon off;"]
