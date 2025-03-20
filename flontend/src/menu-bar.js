@@ -11,10 +11,7 @@ function toggleMenu() {
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 //supabeseの設定
-window.supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 // 検索機能の実装
 let searchTimeout = null;
@@ -132,7 +129,7 @@ async function addUrl() {
 
 // URLをリストとして表示する関数
 async function loadUrls() {
-  const { data, error } = await window.supabaseClient
+  const { data, error } = await Client
     .from("websites")
     .select("*");
 
@@ -175,7 +172,7 @@ async function loadUrls() {
 
 // URLを削除する関数
 async function deleteUrl(id) {
-  const { data, error } = await window.supabaseClient
+  const { data, error } = await Client
     .from("websites")
     .delete()
     .eq("id", id);
