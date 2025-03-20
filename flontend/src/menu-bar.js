@@ -4,12 +4,31 @@ function toggleMenu() {
   menu.style.display = (menu.style.display === "block") ? "none" : "block";
 }
 
-// 環境変数の取得
-const SUPABASE_URL = window.ENV.SUPABASE_URL;
-const SUPABASE_KEY = window.ENV.SUPABASE_KEY;
+async function fetchConfig() {
+  try {
+    const response = await fetch("https://cosmic-weave-604389536871.us-central1.run.app/config");
+    const config = await response.json();
+    
+    // Supabaseの設定
+    const SUPABASE_URL = config.SUPABASE_URL;
+    const SUPABASE_KEY = config.SUPABASE_KEY;
 
-// Supabaseの設定
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      throw new Error("環境変数が取得できませんでした。");
+    }
+
+    // Supabase クライアントの初期化
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("✅ Supabase クライアントが正常に設定されました");
+
+  } catch (error) {
+    console.error("⚠️ 環境変数の取得に失敗しました:", error);
+  }
+}
+
+// フロントエンドのロード時に環境変数を取得
+fetchConfig();
+
 
 // URLを追加する関数
 async function addUrl() {
