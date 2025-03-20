@@ -21,3 +21,4 @@ steps:
 
 images:
   - 'gcr.io/cosmic-weave/flontend'
+
