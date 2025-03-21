@@ -319,3 +319,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // アニメーション開始
 animate();
+
+window.highlightStar = function (url) {
+  if (!window.stars || window.stars.length === 0) {
+    console.warn("星データがまだ読み込まれていません");
+    return;
+  }
+  // すべての星の色をリセット
+  window.stars.forEach((starData) => {
+    starData.material.color.setHex(window.defaultColor);
+  });
+  // 対象の星をハイライト
+  const match = window.stars.find((s) => s.url === url);
+  if (match) {
+    match.material.color.setHex(0xffff00); // 黄色にハイライト
+    console.log(`:星1: 星をハイライト: ${match.title || match.url}`);
+  } else {
+    console.warn("指定されたURLの星が見つかりませんでした:", url);
+  }
+};

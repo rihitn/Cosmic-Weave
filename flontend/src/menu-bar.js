@@ -130,7 +130,9 @@ function displaySearchResults(results) {
     div.className = "search-result-item";
     div.textContent = result.title || result.url;
     div.addEventListener("click", () => {
-      highlightStar(result.url);
+      if (typeof window.highlightStar === "function") {
+        window.highlightStar(result.url);
+      }
       setTimeout(() => {
         searchInput.value = "";
         searchResults.style.display = "none";
