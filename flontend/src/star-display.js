@@ -325,25 +325,23 @@ window.highlightStar = function (url) {
     console.warn(":星1: 星データがまだロードされていません");
     return;
   }
-  // すべての星の色をリセット
+  // すべての星のマテリアルをデフォルト色に戻す（差し替え）
   window.stars.forEach((starData) => {
     if (starData.star && starData.star.material) {
-      starData.star.material.color.setHex(window.defaultColor);
-      starData.star.material.needsUpdate = true;
+      const newMat = new THREE.MeshBasicMaterial({ color: window.defaultColor });
+      starData.star.material.dispose();
+      starData.star.material = newMat;
     }
   });
-  // URLを正規化して一致を取る
+  // URLを正規化して一致を探す
   const normalize = (str) => str.replace(/\/+$/, "");
-  const matchingStar = window.stars.find(
-    (s) => normalize(s.url) === normalize(url)
-  );
-  if (matchingStar && matchingStar.star && matchingStar.star.material) {
-    const material = matchingStar.star.material;
-    console.log("マテリアルの現在色:", material.color.getHexString());
-    material.color.set(0x00ff00); // ← setHex でなく set を試す
-    material.needsUpdate = true;
-    console.log(":チェックマーク_緑: ハイライトされた星:", matchingStar.title || matchingStar.url);
+  const match = window.stars.find((s) => normalize(s.url) === normalize(url));
+  if (match && match.star) {
+    const highlightMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    match.star.material.dispose();
+    match.star.material = highlightMat;
+    console.log(":チェックマーク_緑: ハイライト成功:", match.title || match.url);
   } else {
-    console.warn(":警告: 該当する星が見つかりませんでした:", url);
+    console.warn(":警告: ハイライト対象が見つかりません:", url);
   }
 };
