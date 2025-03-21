@@ -340,4 +340,5 @@ window.highlightStar = function (url) {
   } else {
     console.warn("指定されたURLの星が見つかりませんでした:", url);
   }
+  console.log("matchingStar", matchingStar);
 };
