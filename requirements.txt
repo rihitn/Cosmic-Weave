@@ -5,3 +5,6 @@ supabase
 openai
 bs4
 python-dotenv
+scipy
+numpy
+scikit-learn
