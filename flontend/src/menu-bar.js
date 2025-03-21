@@ -169,16 +169,16 @@ function displaySearchResults(results) {
       searchResults.style.display = "none";
     });
     searchResults.appendChild(div);
-  });
+  }, 300);
 }
 // 星をハイライトする関数
 function highlightStar(url) {
   // すべての星の色をリセット
-  window.stars.forEach((starData) => {
+  stars.forEach((starData) => {
     starData.material.color.setHex(defaultColor);
   });
   // 検索に一致する星をハイライト
-  const matchingStar = window.stars.find((starData) => starData.url === url);
+  const matchingStar = stars.find((starData) => starData.url === url);
   if (matchingStar) {
     matchingStar.material.color.setHex(0xffff00); // 赤色でハイライト
   }
@@ -190,13 +190,13 @@ searchInput.addEventListener("input", (e) => {
   if (!searchTerm) {
     searchResults.style.display = "none";
     // すべての星のハイライトを解除
-    window.stars.forEach((starData) => {
+    stars.forEach((starData) => {
       starData.material.color.setHex(defaultColor);
     });
     return;
   }
   // 検索結果をフィルタリング
-  const results = window.stars.filter((starData) => {
+  const results = stars.filter((starData) => {
     const title = (starData.title || "").toLowerCase();
     const url = starData.url.toLowerCase();
     return title.includes(searchTerm) || url.includes(searchTerm);
