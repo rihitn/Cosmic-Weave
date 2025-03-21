@@ -340,7 +340,7 @@ window.highlightStar = function (url) {
   if (matchingStar && matchingStar.star && matchingStar.star.material) {
     const material = matchingStar.star.material;
     console.log("マテリアルの現在色:", material.color.getHexString());
-    material.color.set(0xffff00); // ← setHex でなく set を試す
+    material.color.setRGB(1.0, 1.0, 0.0); // ← setHex でなく set を試す
     material.needsUpdate = true;
     console.log(":チェックマーク_緑: ハイライトされた星:", matchingStar.title || matchingStar.url);
   } else {
