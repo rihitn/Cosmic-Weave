@@ -332,16 +332,18 @@ window.highlightStar = function (url) {
       starData.star.material.needsUpdate = true;
     }
   });
-  // URLを末尾スラッシュで正規化
+  // URLを正規化して一致を取る
   const normalize = (str) => str.replace(/\/+$/, "");
   const matchingStar = window.stars.find(
     (s) => normalize(s.url) === normalize(url)
   );
   if (matchingStar && matchingStar.star && matchingStar.star.material) {
-    matchingStar.star.material.color.setHex(0xffff00); // 黄色
-    matchingStar.star.material.needsUpdate = true; // ここで反映
-    console.log(`:星1: ハイライト: ${matchingStar.title || matchingStar.url}`);
+    const material = matchingStar.star.material;
+    console.log("マテリアルの現在色:", material.color.getHexString());
+    material.color.set(0xffff00); // ← setHex でなく set を試す
+    material.needsUpdate = true;
+    console.log(":チェックマーク_緑: ハイライトされた星:", matchingStar.title || matchingStar.url);
   } else {
-    console.warn("ハイライト対象が見つかりませんでした", url);
+    console.warn(":警告: 該当する星が見つかりませんでした:", url);
   }
 };
