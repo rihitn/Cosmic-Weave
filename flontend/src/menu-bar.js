@@ -38,6 +38,48 @@ async function fetchConfig() {
 
 fetchConfig();
 
+async function addUrl() {
+  const url = document.getElementById("url").value;
+  if (!url) {
+    alert("URLを入力してください");
+    return;
+  } else if (!(url.startsWith("https://") || url.startsWith("http://"))) {
+    alert("URLはhttps://もしくはhttp://で始まる必要があります");
+    return;
+  }
+  // Supabaseにデータを挿入
+  const { data, error } = await window.supabaseClient
+    .from("websites")
+    .insert([{ url, created_at: new Date() }]);
+  if (error) {
+    console.error(error);
+    // 重複エラーの場合はユーザーフレンドリーなメッセージを表示
+    if (error.code === "23505") {
+      alert("このURLは既に登録されています");
+    } else {
+      alert("URLの追加に失敗しました");
+    }
+  } else {
+    // フォームをクリアしてメモリストを更新
+    document.getElementById("url").value = "";
+    loadUrls();
+  }
+  try {
+    const response = await fetch("https://cosmic-weave-604389536871.us-central1.run.app/process_pipeline", {
+      method: "POST",
+    });
+    const result = await response.json();
+    console.log("Pipeline response:", result);
+    if (result.status === "success") {
+      window.location.href = "/public/index.html"; // :星1:️ ここでリダイレクト
+    } else {
+      alert("パイプラインの実行に失敗しました");
+    }
+  } catch (err) {
+    console.error("Pipelineの実行に失敗:", err);
+  }
+}
+
 // URLをリストとして表示する関数
 async function loadUrls() {
   if (!supabaseClient) {
