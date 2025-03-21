@@ -322,23 +322,26 @@ animate();
 
 window.highlightStar = function (url) {
   if (!window.stars || window.stars.length === 0) {
-    console.warn("星データがまだ読み込まれていません");
+    console.warn(":星1: 星データがまだロードされていません");
     return;
   }
-  // 色リセット
+  // すべての星の色をリセット
   window.stars.forEach((starData) => {
-    starData.material.color.setHex(window.defaultColor);
+    if (starData.star && starData.star.material) {
+      starData.star.material.color.setHex(window.defaultColor);
+      starData.star.material.needsUpdate = true;
+    }
   });
-  // URL末尾の `/` の有無に関係なく比較
+  // URLを末尾スラッシュで正規化
+  const normalize = (str) => str.replace(/\/+$/, "");
   const matchingStar = window.stars.find(
-    (s) => s.url.replace(/\/$/, "") === url.replace(/\/$/, "")
+    (s) => normalize(s.url) === normalize(url)
   );
-  if (matchingStar) {
-    // 正しく star オブジェクトの material にアクセス
-    matchingStar.star.material.color.setHex(0xffff00);
-    console.log(`:星1: ハイライトされた星: ${matchingStar.title || matchingStar.url}`);
+  if (matchingStar && matchingStar.star && matchingStar.star.material) {
+    matchingStar.star.material.color.setHex(0xffff00); // 黄色
+    matchingStar.star.material.needsUpdate = true; // ここで反映
+    console.log(`:星1: ハイライト: ${matchingStar.title || matchingStar.url}`);
   } else {
-    console.warn("指定されたURLの星が見つかりませんでした:", url);
+    console.warn("ハイライト対象が見つかりませんでした", url);
   }
-  console.log("matchingStar", matchingStar);
 };
