@@ -23,9 +23,10 @@ CORS(app)
 
 def run_script(script_name):
     """ 指定されたスクリプトを実行（リアルタイムでログを出力） """
+    script_path = os.path.join("backend", script_name)
     try:
         process = subprocess.Popen(
-            ["python", script_name],
+            ["python", script_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -50,7 +51,7 @@ def process_pipeline():
     try:
         # Supabase から新しい URL を取得
         response = supabase.table("websites").select("id, url").order("created_at", desc=True).limit(1).execute()
-        
+
         if not response or not response.data or len(response.data) == 0:
             return jsonify({"status": "error", "message": "No new URL found in database"}), 400
 
@@ -58,17 +59,17 @@ def process_pipeline():
         new_url = response.data[0]["url"]
         print(f"Processing new URL: {new_url} (ID: {new_url_id})")
 
-        # Step 1: main.py を実行（HTML取得 & タイトル・本文抽出）
+        # Step 1: main.py を実行
         print("Running main.py...")
         main_result = run_script("main.py")
         print(main_result["output"])
 
-        # Step 2: embedding.py を実行（埋め込み生成 & データベース更新）
+        # Step 2: embedding.py を実行
         print("Running embedding.py...")
         embedding_result = run_script("embedding.py")
         print(embedding_result["output"])
 
-        # Step 3: similarity.py を実行（類似度計算 & MDS座標更新）
+        # Step 3: similarity.py を実行
         print("Running similarity.py...")
         similarity_result = run_script("similarity.py")
         print(similarity_result["output"])
@@ -95,5 +96,5 @@ def get_config():
     })
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))  # Cloud Run 互換のためのポート設定
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=True)
