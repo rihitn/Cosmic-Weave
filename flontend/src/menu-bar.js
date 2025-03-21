@@ -5,7 +5,7 @@ function toggleMenu() {
 }
 
 // Supabase クライアントを格納するグローバル変数
-let supabaseClient = null;
+window.supabaseClient = null;
 
 // 環境変数を取得する関数
 async function fetchConfig() {
@@ -22,16 +22,21 @@ async function fetchConfig() {
     }
 
     // Supabase クライアントの初期化
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     console.log("✅ Supabase クライアントが正常に設定されました");
 
     // 🔥 Supabaseクライアントが初期化された後に `loadUrls()` を実行
     loadUrls();
+    if (typeof fetchStarDataAndCreateStars === "function") {
+      fetchStarDataAndCreateStars();
+    }
 
   } catch (error) {
     console.error("⚠️ 環境変数の取得に失敗しました:", error);
   }
 }
+
+fetchConfig();
 
 // URLをリストとして表示する関数
 async function loadUrls() {

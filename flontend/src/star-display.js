@@ -25,6 +25,31 @@ window.defaultColor = 0xffffff;
 // ホバー効果用の円を追跡する変数
 let hoverCircle = null;
 
+// Supabaseクライアントが定義されるまで待機する関数
+function waitForSupabaseClient(callback) {
+  let retries = 10;
+  const interval = setInterval(() => {
+    if (window.supabaseClient) {
+      clearInterval(interval);
+      console.log("✅ Supabaseクライアントが `star-display.js` で利用可能になりました");
+      callback();
+    } else {
+      console.warn("⏳ Supabaseクライアントが未定義... 再試行");
+      retries--;
+      if (retries === 0) {
+        clearInterval(interval);
+        console.error("❌ Supabaseクライアントが取得できませんでした");
+      }
+    }
+  }, 500); // 500msごとにチェック
+}
+
+// `fetchStarDataAndCreateStars()` を Supabase クライアントが定義された後に実行
+document.addEventListener("DOMContentLoaded", () => {
+  waitForSupabaseClient(fetchStarDataAndCreateStars);
+});
+
+
 // Supabaseからデータを取得して星を生成する関数
 async function fetchStarDataAndCreateStars() {
   try {
