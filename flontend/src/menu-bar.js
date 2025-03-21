@@ -146,5 +146,64 @@ async function deleteUrl(id) {
   }
 }
 
+// 検索機能の実装
+let searchTimeout = null;
+const searchInput = document.getElementById("search-input");
+const searchResults = document.getElementById("search-results");
+// 検索結果を表示する関数
+function displaySearchResults(results) {
+  searchResults.innerHTML = "";
+  if (results.length === 0) {
+    searchResults.style.display = "none";
+    return;
+  }
+  searchResults.style.display = "block";
+  results.forEach((result) => {
+    const div = document.createElement("div");
+    div.className = "search-result-item";
+    div.textContent = result.title || result.url;
+    div.addEventListener("click", () => {
+      // 検索結果をクリックしたら、対応する星をハイライト
+      highlightStar(result.url);
+      searchInput.value = "";
+      searchResults.style.display = "none";
+    });
+    searchResults.appendChild(div);
+  });
+}
+// 星をハイライトする関数
+function highlightStar(url) {
+  // すべての星の色をリセット
+  stars.forEach((starData) => {
+    starData.material.color.setHex(defaultColor);
+  });
+  // 検索に一致する星をハイライト
+  const matchingStar = stars.find((starData) => starData.url === url);
+  if (matchingStar) {
+    matchingStar.material.color.setHex(0xffff00); // 赤色でハイライト
+  }
+}
+// 検索入力のイベントリスナー
+searchInput.addEventListener("input", (e) => {
+  const searchTerm = e.target.value.toLowerCase();
+  // 検索文字列が空の場合
+  if (!searchTerm) {
+    searchResults.style.display = "none";
+    // すべての星のハイライトを解除
+    stars.forEach((starData) => {
+      starData.material.color.setHex(defaultColor);
+    });
+    return;
+  }
+  // 検索結果をフィルタリング
+  const results = stars.filter((starData) => {
+    const title = (starData.title || "").toLowerCase();
+    const url = starData.url.toLowerCase();
+    return title.includes(searchTerm) || url.includes(searchTerm);
+  });
+  // 検索結果を表示
+  displaySearchResults(results);
+});
+
 // 🔥 ページ読み込み時に環境変数を取得し、loadUrls を実行
 fetchConfig();
