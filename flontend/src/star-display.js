@@ -325,15 +325,18 @@ window.highlightStar = function (url) {
     console.warn("星データがまだ読み込まれていません");
     return;
   }
-  // すべての星の色をリセット
+  // 色リセット
   window.stars.forEach((starData) => {
     starData.material.color.setHex(window.defaultColor);
   });
-  // 対象の星をハイライト
-  const match = window.stars.find((s) => s.url === url);
-  if (match) {
-    match.material.color.setHex(0xffff00); // 黄色にハイライト
-    console.log(`:星1: 星をハイライト: ${match.title || match.url}`);
+  // URL末尾の `/` の有無に関係なく比較
+  const matchingStar = window.stars.find(
+    (s) => s.url.replace(/\/$/, "") === url.replace(/\/$/, "")
+  );
+  if (matchingStar) {
+    // 正しく star オブジェクトの material にアクセス
+    matchingStar.star.material.color.setHex(0xffff00);
+    console.log(`:星1: ハイライトされた星: ${matchingStar.title || matchingStar.url}`);
   } else {
     console.warn("指定されたURLの星が見つかりませんでした:", url);
   }
