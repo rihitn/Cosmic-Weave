@@ -1,16 +1,17 @@
-import { defineConfig } from "vite";
-import path from "path";
+// vite.config.js
+import { defineConfig } from 'vite';
+import path from 'path';
 
 export default defineConfig({
-  root: "public", // ← index.html のある場所
-  publicDir: false, // ← これで二重読み込みを防ぐ
+  root: 'public',
+  publicDir: false,
   resolve: {
     alias: {
-      "/src": path.resolve(__dirname, "src"), // ← /src を使えるようにする
+      '/src': path.resolve(__dirname, 'src'),
     },
   },
   build: {
-    outDir: "../dist",
+    outDir: '../dist',
     emptyOutDir: true,
   },
 });
