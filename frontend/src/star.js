@@ -1,4 +1,4 @@
-import { waitForSupabase, fetchStar } from "/supabase.js";
+import { waitForSupabase, fetchStar } from "/src/supabase.js";
 //three
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/controls/OrbitControls.js";
