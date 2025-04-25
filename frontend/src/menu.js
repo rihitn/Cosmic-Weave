@@ -1,4 +1,4 @@
-import { insertUrl } from "./supabase";
+import { insertUrl } from "./supabase.js";
 
 function toggleMenu() {
   const menu = document.getElementById("menu");
