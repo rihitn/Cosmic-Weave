@@ -3,11 +3,12 @@ FROM nginx:alpine
 
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 # フロントエンドのビルド済みファイルを Nginx にコピー
-COPY frontend /usr/share/nginx/html
+COPY frontend/dist /usr/share/nginx/html
 COPY /entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+
 EXPOSE 8080
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Nginx を起動
 CMD ["nginx", "-g", "daemon off;"]
