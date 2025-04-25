@@ -1,7 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const supabaseUrl = "https://xxxx.supabase.co"; // ここに自分のURL
-const supabaseAnonKey = "your-anon-key";
+const supabaseUrl = "VITE_SUPABASE_URL"; // ここに自分のURL
+const supabaseAnonKey = "VITE_SUPABASE_ANON_KEY";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
