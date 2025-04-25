@@ -1,10 +1,13 @@
 #!/bin/sh
 set -e
 
-# env.template.js → env.js に置換出力
-sed -e "s|%%SUPABASE_URL%%|${SUPABASE_URL}|g" \
-    -e "s|%%SUPABASE_ANON_KEY%%|${SUPABASE_ANON_KEY}|g" \
-    /usr/share/nginx/html/env.template.js \
-    > /usr/share/nginx/html/env.js
+# ↓ Cloud Run の環境変数を env.js に注入
+cat <<EOF > /usr/share/nginx/html/env.js
+window.__ENV = {
+  SUPABASE_URL: "${SUPABASE_URL}",
+  SUPABASE_ANON_KEY: "${SUPABASE_ANON_KEY}"
+};
+EOF
+echo "[entrypoint] env.js generated"
 
 exec nginx -g "daemon off;"
