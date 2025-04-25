@@ -1,20 +1,20 @@
 steps:
   # 1. フロントエンドの Docker イメージをビルド
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/cosmic-weave/flontend', '-f', 'Dockerfile-frontend', '.']
+    args: ['build', '-t', 'gcr.io/cosmic-weave/frontend', '-f', 'Dockerfile-frontend', '.']
 
   # 2. Google Container Registry にプッシュ
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/cosmic-weave/flontend']
+    args: ['push', 'gcr.io/cosmic-weave/frontend']
 
   # 3. Cloud Run にデプロイ
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'run'
       - 'deploy'
-      - 'flontend'
+      - 'frontend'
       - '--image'
-      - 'gcr.io/cosmic-weave/flontend'
+      - 'gcr.io/cosmic-weave/frontend'
       - '--region'
       - 'us-central1'
       - '--platform'
@@ -23,4 +23,4 @@ steps:
       - '--port=8080'
 
 images:
-  - 'gcr.io/cosmic-weave/flontend'
+  - 'gcr.io/cosmic-weave/frontend'
