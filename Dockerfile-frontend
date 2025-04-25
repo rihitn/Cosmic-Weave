@@ -1,9 +1,11 @@
-# 軽量の Nginx を使用
 FROM nginx:alpine
 
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
-# フロントエンドのビルド済みファイルを Nginx にコピー
-COPY frontend /usr/share/nginx/html
+# ------- 静的ファイルを配置 -------
+COPY frontend/public/ /usr/share/nginx/html/
+COPY frontend/src/    /usr/share/nginx/html/src/
+
+# ------- Nginx 設定 + エントリポイント -------
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
