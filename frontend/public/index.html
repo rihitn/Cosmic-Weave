@@ -1,18 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="./favicon.png" />
     <title>Cosmic Weave</title>
     <link rel="stylesheet" href="./style.css" />
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+      #url-display {
+        position: absolute;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 4px 8px;
+        border-radius: 6px;
+        visibility: hidden;
+      }
+    </style>
   </head>
 
   <body>
     <header>
       <div
         class="header-logo"
-        onclick="location.href='./public/index.html'"
+        onclick="location.href='./index.html'"
         style="cursor: pointer"
       >
         Cosmic Weave
@@ -22,6 +36,7 @@
         login
       </button>
     </header>
+
     <div id="url-display">URLが表示されます</div>
 
     <div class="menu" id="menu">
@@ -50,7 +65,8 @@
       </div>
     </div>
 
-    <script type="module" src="../src/star.js"></script>
-    <script type="module" src="../src/menu.js"></script>
+    <!-- モジュールを正しく読み込むための相対パス調整 -->
+    <script type="module" src="/src/star.js"></script>
+    <script type="module" src="/src/menu.js"></script>
   </body>
 </html>

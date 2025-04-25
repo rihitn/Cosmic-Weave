@@ -1,10 +1,11 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = "https://xxxx.supabase.co"; // ここに自分のURL
+const supabaseAnonKey = "your-anon-key";
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// 以下の関数は同じ（省略しません）
 export function waitForSupabase(callback) {
   let retry = 10;
   const interval = setInterval(() => {
