@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>Cosmic Weave</title>
+    <link rel="stylesheet" href="../src/style.css" />
+  </head>
+
+  <body>
+    <header>
+      <div
+        class="header-logo"
+        onclick="location.href='/index.html'"
+        style="cursor: pointer"
+      >
+        Cosmic Weave
+      </div>
+      <button class="menu-button">menu</button>
+      <button onclick="location.href='/loginPage.html'" class="login-button">
+        login
+      </button>
+    </header>
+    <div id="url-display">URLが表示されます</div>
+
+    <div class="menu" id="menu">
+      <div class="search-form">
+        <h3>検索</h3>
+        <input type="text" id="search-input" placeholder="キーワードを入力" />
+        <div id="search-results" class="search-results"></div>
+      </div>
+      <div class="url-form">
+        <div class="url-header">
+          <h3>URLを登録</h3>
+          <div class="url-counter"></div>
+        </div>
+        <input
+          type="url"
+          id="url"
+          placeholder="URLを入力"
+          required
+          pattern="https?://.*"
+          title="URLはhttps://もしくはhttp://から始まる必要があります"
+        />
+        <button class="addUrl-button">追加</button>
+      </div>
+      <div class="added-urls-list">
+        <ul id="url-list"></ul>
+      </div>
+    </div>
+
+    <script type="module" src="/src/star.js"></script>
+    <script type="module" src="/src/menu.js"></script>
+  </body>
+</html>
