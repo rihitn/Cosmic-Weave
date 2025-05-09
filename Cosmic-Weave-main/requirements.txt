@@ -1,0 +1,13 @@
+flask
+flask-cors
+requests
+supabase
+openai
+bs4
+python-dotenv
+scipy
+numpy
+scikit-learn
+pandas
+mecab-python3
+unidic-lite
