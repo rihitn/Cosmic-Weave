@@ -8,6 +8,14 @@ function toggleMenu() {
 const menuButton = document.querySelector(".menu-button");
 menuButton.addEventListener("click", toggleMenu);
 
+function toggleAddForm() {
+  const addForm = document.getElementById("add-urls-form");
+  addForm.style.display = addForm.style.display === "block" ? "none" : "block";
+}
+
+const addButton = document.querySelector(".add-urls-button");
+addButton.addEventListener("click", toggleAddForm);
+
 // URLを追加する関数
 async function addUrl() {
   const url = document.getElementById("url").value;
