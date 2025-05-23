@@ -8,6 +8,13 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const scene = new THREE.Scene();
 
+const loader = new THREE.TextureLoader();
+
+loader.load("/aig-006aig-v23102-xl_TP_V.jpg", function (texture) {
+  scene.background = texture;
+  texture.colorSpace = THREE.SRGBColorSpace;
+});
+
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
@@ -17,6 +24,8 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.z = 30;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NoToneMapping;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0x000000, 0);
 document.body.appendChild(renderer.domElement);
