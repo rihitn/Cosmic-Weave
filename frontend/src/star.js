@@ -1,11 +1,19 @@
-import { waitForSupabase, fetchStar } from "/src/supabase.js";
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/controls/OrbitControls.js";
-import { EffectComposer } from "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/postprocessing/EffectComposer.js";
-import { RenderPass } from "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/postprocessing/RenderPass.js";
-import { UnrealBloomPass } from "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { waitForSupabase, fetchStar } from "./supabase.js";
+//three
+import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const scene = new THREE.Scene();
+
+const loader = new THREE.TextureLoader();
+
+loader.load("/CosB3.png", function (texture) {
+  scene.background = texture;
+  texture.colorSpace = THREE.SRGBColorSpace;
+});
 
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -15,8 +23,11 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.z = 30;
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.NoToneMapping;
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000, 0);
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -200,6 +211,7 @@ window.addEventListener("resize", () => {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height);
+  renderer.setClearColor(0x000000, 0);
   firstComposer.setSize(width, height);
 });
 

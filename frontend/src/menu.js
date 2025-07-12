@@ -1,4 +1,4 @@
-import { insertUrl } from "/src/supabase.js";
+import { insertUrl } from "./supabase";
 
 function toggleMenu() {
   const menu = document.getElementById("menu");
@@ -7,6 +7,14 @@ function toggleMenu() {
 
 const menuButton = document.querySelector(".menu-button");
 menuButton.addEventListener("click", toggleMenu);
+
+function toggleAddForm() {
+  const addForm = document.getElementById("add-urls-form");
+  addForm.style.display = addForm.style.display === "block" ? "none" : "block";
+}
+
+const addButton = document.querySelector(".add-urls-button");
+addButton.addEventListener("click", toggleAddForm);
 
 // URLを追加する関数
 async function addUrl() {
@@ -31,7 +39,7 @@ async function addUrl() {
       const result = await response.json();
       console.log("Pipeline response:", result);
       if (result.status === "success") {
-        window.location.href = "/public/index.html"; // 処理完了後にリダイレクト
+        window.location.href = "/index.html"; // 処理完了後にリダイレクト
       } else {
         alert("パイプラインの実行に失敗しました");
       }
