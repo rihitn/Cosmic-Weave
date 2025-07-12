@@ -1,5 +1,7 @@
 body {
   background: linear-gradient(to right, #000000, #3533cd);
+  margin: 0;
+  padding: 0;
 }
 
 canvas {
@@ -9,10 +11,16 @@ canvas {
   width: 100%;
   height: 100%;
   z-index: -1; /* 最背面に配置 */
+  display: block;
+  background: transparent !important;
 }
 
 header {
-  position: absolute;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
   top: 10px;
   left: 0;
   color: white;
@@ -34,12 +42,9 @@ header {
   border: 1px solid white;
 }
 
-.header-logo {
-  float: left;
-  font-size: 30px;
-  color: white;
-  font-weight: 700;
-  padding: 20px 10px 20px 10px;
+.header-logo img {
+  height: 70px;
+  padding: 10px 10px 20px 10px;
 }
 
 .menu {
@@ -50,13 +55,51 @@ header {
   height: 100%; /* メニューの高さは画面全体 */
   width: 350px; /* メニューの固定幅を設定 */
   background-color: rgba(33, 33, 33, 0.8);
-  padding-top: 20px; /* 上部の余白 */
-  z-index: 1;
+  padding-top: 70px; /* 上部の余白 */
+  z-index: 0;
   color: white;
   overflow-y: auto; /* 縦方向のスクロールを有効化 */
 }
 
 /* ボタンのスタイル */
+.add-urls-button {
+  position: absolute;
+  left: 50%; /* 左から50%の位置 */
+  transform: translateX(-50%); /* ボタンの幅の半分だけ左に戻して中央に */
+  width: 80px;
+  height: 80px;
+  background-image: url("/Add3.png"); /* PNGやWebPなど */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  cursor: pointer;
+  background-color: transparent; /* 背景色を透明に */
+  margin-top: 75px;
+}
+
+.add-urls-form {
+  display: none;
+  position: fixed;
+  top: 29%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  background-color: rgba(33, 33, 33, 0.8);
+  width: 30%;
+  border-radius: 8px;
+  padding: 3px 10px;
+}
+
+.add-urls-button:hover {
+  width: 90px;
+  height: 90px;
+}
+
+.right-button {
+  z-index: 1;
+}
+
 .login-button,
 .menu-button {
   padding: 10px 20px;
@@ -65,7 +108,7 @@ header {
   font-size: 18px;
   border: none;
   cursor: pointer;
-  margin: 25px 10px;
+  margin: 10px 20px 0px 10px;
   border-radius: 5px;
 }
 
