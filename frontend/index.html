@@ -10,6 +10,7 @@
   </head>
 
   <body>
+    <div id="screen-overlay"></div>
     <header>
       <div
         class="header-logo"
@@ -25,14 +26,18 @@
           login
         </button>
       </div>
+      
     </header>
+    <div class="hud-wrapper">
     <div id="zoom-display">Zoom: 100%</div>
+    <div class="url-counter">URL: 0</div>
+  </div>
     <div id="url-display">URLが表示されます</div>
 
     <div class="add-urls-form" id="add-urls-form">
       <div class="search-form">
         <h3 class="strings">Search</h3>
-        <input type="text" id="search-input" placeholder="キーワードを入力" />
+        <input type="text" id="search-input" placeholder="キーワードを入力して検索" />
         <div id="search-results" class="search-results"></div>
       </div>
       <div class="url-form">
@@ -47,7 +52,7 @@
           pattern="https?://.*"
           title="URLはhttps://もしくはhttp://から始まる必要があります"
         />
-        <button class="addUrl-button">追加</button>
+        <button class="addUrl-button">add</button>
       </div>
     </div>
 

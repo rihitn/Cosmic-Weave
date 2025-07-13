@@ -1,4 +1,6 @@
 import { waitForSupabase, fetchStar } from "./supabase.js";
+import { formIsActive, setFormIsActive, getFormIsActive, toggleAddForm } from './menu.js';
+
 //three
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
@@ -134,6 +136,7 @@ let hoveredStar = null;
 const urlDisplay = document.getElementById("url-display");
 
 window.addEventListener("mousemove", (event) => {
+  if (getFormIsActive()) return;
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -192,6 +195,7 @@ window.addEventListener("mousemove", (event) => {
 
 // マウスクリックで星の色をトグルおよびURL遷移
 window.addEventListener("click", (event) => {
+  if (getFormIsActive()) return;
   // レイキャスターを使ってクリックされた星を判定
   raycaster.setFromCamera(mouse, camera);
 
@@ -292,6 +296,8 @@ function highlightStar(url) {
   if (match) {
     match.material.color.setHex(0xffff00); // ハイライト色
   }
+
+  toggleAddForm();
 }
 
 searchInput.addEventListener("input", (e) => {

@@ -8,16 +8,29 @@ function toggleMenu() {
 const menuButton = document.querySelector(".menu-button");
 menuButton.addEventListener("click", toggleMenu);
 
-let formIsActive = false;
+export let formIsActive = false;
 
-function toggleAddForm() {
+export function setFormIsActive(value) {
+  formIsActive = value;
+}
+
+export function getFormIsActive() {
+  return formIsActive;
+}
+
+
+export function toggleAddForm() {
   const addForm = document.getElementById("add-urls-form");
   const urlInput = document.getElementById("url");
+  const overlay = document.getElementById("screen-overlay");
 
   const isVisible = addForm.style.display === "block";
   addForm.style.display = isVisible ? "none" : "block";
 
-  formIsActive = !isVisible; // ← ここでフラグを更新！
+  formIsActive = !isVisible;
+  setFormIsActive(formIsActive); // ← ここでフラグを更新！
+
+  overlay.style.display = formIsActive ? "block" : "none";
 
   if (!isVisible) {
     // フォーカス + クリップボード内容を挿入
