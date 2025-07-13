@@ -21,7 +21,7 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.z = 30;
+camera.position.z = 90;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -35,6 +35,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 //線の描写に必要
 const geometry = new THREE.BufferGeometry();
 const stars = [];
+const clickableStars = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   waitForSupabase(generateStar);
@@ -62,6 +63,16 @@ async function generateStar() {
     star.position.set(position[0], position[1], position[2]);
 
     scene.add(star);
+
+    const clickableGeometry = new THREE.SphereGeometry(4.0, 8, 8); // ← 判定サイズ拡大
+    const clickableMaterial = new THREE.MeshBasicMaterial({ visible: false }); // 非表示
+    const clickable = new THREE.Mesh(clickableGeometry, clickableMaterial);
+    clickable.position.set(...position);
+    clickable.userData.linkedStar = star; // 元の星を参照
+    scene.add(clickable);
+
+    clickableStars.push(clickable);
+
     stars.push({
       position: new THREE.Vector3(...position),
       star,
@@ -127,13 +138,13 @@ window.addEventListener("mousemove", (event) => {
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(stars.map((s) => s.star));
+  const intersects = raycaster.intersectObjects(clickableStars);
 
   if (intersects.length > 0) {
     document.body.style.cursor = "pointer"; 
 
     // intersectsが空でない場合にのみ処理を進める
-    const first = intersects[0].object;
+    const first = intersects[0].object.userData.linkedStar;
 
     if (hoveredStar !== first) {
       // 前のホバーを戻す
@@ -184,10 +195,10 @@ window.addEventListener("click", (event) => {
   // レイキャスターを使ってクリックされた星を判定
   raycaster.setFromCamera(mouse, camera);
 
-  const intersects = raycaster.intersectObjects(stars.map((s) => s.star));
+  const intersects = raycaster.intersectObjects(clickableStars);
 
   if (intersects.length > 0) {
-    const star = intersects[0].object;
+    const star = intersects[0].object.userData.linkedStar;
 
     // 星の色をトグル
     if (star.material.color.getHex() !== 0xff0000) {
@@ -202,10 +213,31 @@ window.addEventListener("click", (event) => {
   }
 });
 
+
+let prevCameraDistance = camera.position.distanceTo(controls.target);
+let lastZoomPercent = 100;
+const baseZoom = 90; // 初期の Z 位置を基準とした倍率
+
+controls.addEventListener("change", () => {
+  const currentDistance = camera.position.distanceTo(controls.target);
+
+  // 距離が明らかに変わっていればズームと判断（回転やパンは距離がほぼ一定）
+  const distanceDiff = Math.abs(currentDistance - prevCameraDistance);
+  if (distanceDiff > 0.05) {
+    const zoomPercent = Math.round((baseZoom / currentDistance) * 100);
+    if (zoomPercent !== lastZoomPercent) {
+      document.getElementById("zoom-display").textContent = `Zoom: ${zoomPercent}%`;
+      lastZoomPercent = zoomPercent;
+    }
+    prevCameraDistance = currentDistance;
+  }
+});
+
+
 function animate() {
   requestAnimationFrame(animate);
   firstComposer.render();
-  controls.update;
+  controls.update();
 }
 
 animate();
