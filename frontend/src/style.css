@@ -1,5 +1,5 @@
 body {
-  background: linear-gradient(to right, #000000, #3533cd);
+  background: #000000;
   margin: 0;
   padding: 0;
 }
@@ -66,8 +66,8 @@ header {
   position: absolute;
   left: 50%; /* 左から50%の位置 */
   transform: translateX(-50%); /* ボタンの幅の半分だけ左に戻して中央に */
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   background-image: url("/Add3.png"); /* PNGやWebPなど */
   background-size: cover;
   background-repeat: no-repeat;
@@ -85,15 +85,15 @@ header {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  background-color: rgba(33, 33, 33, 0.8);
+  background-color: rgba(60, 60, 60, 0.8);
   width: 30%;
   border-radius: 8px;
   padding: 3px 10px;
 }
 
 .add-urls-button:hover {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
 }
 
 .right-button {
@@ -154,16 +154,6 @@ a {
 
 a:hover {
   text-decoration: underline;
-}
-
-.url-counter {
-  color: #fff;
-  background-color: #555;
-  padding: 3px 8px;
-  border-radius: 4px;
-  display: inline-block;
-  font-size: 12px;
-  margin-left: 10px;
 }
 
 .url-header {
@@ -303,17 +293,23 @@ button:hover,
   box-shadow: 0 0 12px rgba(100, 149, 237, 0.8);  /* より強く青白く光る */
 }
 
-#zoom-display {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  color: white;
-  font-size: 14px;
-  background: rgba(0, 0, 0, 0.5);
-  padding: 6px 10px;
-  border-radius: 5px;
+.hud-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* 左揃え */
+  gap: 6px;
+  margin-top: 90px;
+  margin-left: 16px;
+}
+
+#zoom-display,
+.url-counter {
+  color: #ffffff;
+  background: rgba(0, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 4px;
   font-family: 'Orbitron', sans-serif;
-  z-index: 100;
+  font-size: 14px;
 }
 
 .strings{
@@ -323,4 +319,16 @@ button:hover,
 
 canvas.disable-pointer {
   pointer-events: none;
+}
+
+#screen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.05); /* 微妙な白色で光感を演出 */
+  z-index: 0;
+  display: none;
 }
