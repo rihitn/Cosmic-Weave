@@ -21,6 +21,11 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/", methods=["GET"])
+def index():
+    """ヘルスチェック用のルート"""
+    return jsonify({"status": "ok"})
+
 def run_script(script_name):
     """ 指定されたスクリプトを実行（リアルタイムでログを出力） """
     script_path = os.path.join("backend", script_name)
