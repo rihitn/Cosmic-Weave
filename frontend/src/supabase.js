@@ -74,7 +74,7 @@ async function loadUrls() {
     const displayText =
       urlRecord.title?.trim() !== "" ? urlRecord.title : urlRecord.url;
     li.innerHTML = `
-        <a href="${urlRecord.url}" target="_blank">${displayText}</a>
+        <a href="${urlRecord.url}" target="_blank" title="${displayText}">${displayText}</a>
         <button class="delete-button" data-id="${urlRecord.id}">削除</button>
       `;
     li.querySelector(".delete-button").addEventListener("click", () => {

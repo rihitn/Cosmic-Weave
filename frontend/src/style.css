@@ -103,13 +103,14 @@ header {
 .login-button,
 .menu-button {
   padding: 10px 20px;
-  background-color: #333;
+  background-color: #4a6da7;
   color: white;
   font-size: 18px;
   border: none;
   cursor: pointer;
   margin: 10px 20px 0px 10px;
   border-radius: 5px;
+  font-family: 'Orbitron', sans-serif;
 }
 
 .url-form,
@@ -123,10 +124,10 @@ header {
 .added-urls-list {
   margin: 20px 15px;
   background-color: rgba(66, 66, 66, 0.7);
-  margin-top: 20px;
+  margin-top: 40px;
   padding: 15px;
   border-radius: 8px;
-  max-height: 580px; /* 最大高さを設定 */
+  max-height: 730px; /* 最大高さを設定 */
   overflow-y: auto; /* リスト内でもスクロール可能に */
 }
 
@@ -153,11 +154,6 @@ a {
 
 a:hover {
   text-decoration: underline;
-}
-
-.login-button:hover,
-.menu-button:hover {
-  background-color: #555;
 }
 
 .url-counter {
@@ -257,4 +253,52 @@ a:hover {
 .login-logo img {
   max-height: 100%;
   display: block;
+}
+
+.delete-button {
+  background-color: #a12525;  /* 暗めの赤 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: 'Orbitron', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);  /* ほんのり赤い影 */
+}
+
+.delete-button:hover {
+  background-color: #ff4444;  /* ホバーで明るく */
+  transform: scale(1.05);  /* わずかに拡大 */
+  box-shadow: 0 0 8px rgba(255, 80, 80, 0.6);  /* 強めの赤い光 */
+}
+
+.added-urls-list ul li a {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 75%;  /* ← 必須：削除ボタンとのバランスを取る */
+  vertical-align: middle;
+}
+
+button,
+.login-button,
+.menu-button,
+.url-form button,
+.search-form button {
+  box-shadow: 0 0 8px rgba(74, 109, 167, 0.5);  /* 青系の柔らかい光 */
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+/* ホバー時にGlowを強調 */
+button:hover,
+.login-button:hover,
+.menu-button:hover,
+.url-form button:hover,
+.search-form button:hover {
+  background-color: #3a5a8f; /* トーンアップ */
+  transform: scale(1.05);  /* 少し拡大 */
+  box-shadow: 0 0 12px rgba(100, 149, 237, 0.8);  /* より強く青白く光る */
 }

@@ -130,6 +130,8 @@ window.addEventListener("mousemove", (event) => {
   const intersects = raycaster.intersectObjects(stars.map((s) => s.star));
 
   if (intersects.length > 0) {
+    document.body.style.cursor = "pointer"; 
+
     // intersectsが空でない場合にのみ処理を進める
     const first = intersects[0].object;
 
@@ -165,6 +167,9 @@ window.addEventListener("mousemove", (event) => {
       }
     }
   } else {
+    document.body.style.cursor = "default"; // ← ホバーが外れたときに戻す
+
+
     // どこにもホバーしてないならリセット
     if (hoveredStar) {
       hoveredStar.scale.set(1, 1, 1);
