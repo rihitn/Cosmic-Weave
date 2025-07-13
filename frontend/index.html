@@ -26,22 +26,23 @@
         </button>
       </div>
     </header>
+    <div id="zoom-display">Zoom: 100%</div>
     <div id="url-display">URLが表示されます</div>
 
     <div class="add-urls-form" id="add-urls-form">
       <div class="search-form">
-        <h3>検索</h3>
+        <h3 class="strings">Search</h3>
         <input type="text" id="search-input" placeholder="キーワードを入力" />
         <div id="search-results" class="search-results"></div>
       </div>
       <div class="url-form">
         <div class="url-header">
-          <h3>URLを登録</h3>
+          <h3 class="strings">Add URL</h3>
         </div>
         <input
           type="url"
           id="url"
-          placeholder="URLを入力"
+          placeholder="URLを入力して星を追加する"
           required
           pattern="https?://.*"
           title="URLはhttps://もしくはhttp://から始まる必要があります"

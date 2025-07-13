@@ -8,9 +8,32 @@ function toggleMenu() {
 const menuButton = document.querySelector(".menu-button");
 menuButton.addEventListener("click", toggleMenu);
 
+let formIsActive = false;
+
 function toggleAddForm() {
   const addForm = document.getElementById("add-urls-form");
-  addForm.style.display = addForm.style.display === "block" ? "none" : "block";
+  const urlInput = document.getElementById("url");
+
+  const isVisible = addForm.style.display === "block";
+  addForm.style.display = isVisible ? "none" : "block";
+
+  formIsActive = !isVisible; // ← ここでフラグを更新！
+
+  if (!isVisible) {
+    // フォーカス + クリップボード内容を挿入
+    urlInput.focus();
+    navigator.clipboard.readText()
+      .then((text) => {
+        if (/^https?:\/\/.+/.test(text)) {
+          urlInput.value = text;
+        }else{
+          console.log("クリップボードにURLがありません")
+        }
+      })
+      .catch((err) => {
+        console.error("クリップボードの読み取りに失敗:", err);
+      });
+  }
 }
 
 const addButton = document.querySelector(".add-urls-button");
@@ -51,3 +74,5 @@ async function addUrl() {
 
 const addUrlButton = document.querySelector(".addUrl-button");
 addUrlButton.addEventListener("click", addUrl);
+
+
