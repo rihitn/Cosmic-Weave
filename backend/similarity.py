@@ -1,107 +1,124 @@
-import sys
-import codecs
-
-# Windows環境の文字化け対策
-if sys.platform == "win32":
-    import codecs
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
-
+import json
 import os
+import warnings
+
 import numpy as np
+from dotenv import load_dotenv
 from scipy.spatial.distance import cosine
-from supabase import create_client
 from sklearn.manifold import MDS
+from supabase import create_client
+
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+supabase = create_client(
+    os.environ["SUPABASE_URL"],
+    os.environ["SUPABASE_KEY"],
+)
 
-import json  # 追加
 
-def fetch_vectors():
-    """Supabase からベクトルデータを取得し、適切な型に変換"""
+def fetch_vectors() -> dict[int, np.ndarray]:
+    """embeddingが存在する全レコードを取得"""
     response = supabase.table("websites").select("id, embedding").execute()
-    
-    if response.data:
-        data = response.data
-        vectors = {}
 
-        for item in data:
-            emb = item["embedding"]  # embedding の元データ
-            
-            # 型チェック
-            print(f"ID: {item['id']} の embedding 型: {type(emb)}")
-            
-            if emb is None:
-                print(f"⚠️ ID {item['id']} の embedding が None です！スキップします。")
+    vectors = {}
+    for item in response.data or []:
+        emb = item["embedding"]
+        if emb is None:
+            print(f"⚠️ ID {item['id']}: embedding なし → スキップ")
+            continue
+
+        # Supabaseからはlist[float]で返ってくることが多いが念のため変換
+        if isinstance(emb, str):
+            try:
+                emb = json.loads(emb)
+            except json.JSONDecodeError:
+                print(f"⚠️ ID {item['id']}: JSON変換失敗 → スキップ")
                 continue
-            
-            if isinstance(emb, str):  # 文字列の場合は JSON 変換
-                try:
-                    emb = json.loads(emb)  # JSON 文字列をリストに変換
-                except json.JSONDecodeError:
-                    print(f"⚠️ ID {item['id']} の embedding が JSON 変換できません！スキップします。")
-                    continue
-            
-            if isinstance(emb, list):  # 正しいリスト形式
-                emb = np.array(emb, dtype=np.float32)
-            elif isinstance(emb, np.ndarray):  # 既に ndarray の場合
-                emb = emb.astype(np.float32)
-            else:
-                print(f"⚠️ ID {item['id']} の embedding が未知の型 {type(emb)} です！スキップします。")
-                continue
-            
-            # 正常データのみ登録
-            vectors[item["id"]] = emb
 
-        return vectors
-    
-    else:
-        print("データが見つかりません")
-        return {}
+        vectors[item["id"]] = np.array(emb, dtype=np.float64)
 
-def compute_cosine_similarity(vectors):
-    """コサイン類似度行列を作成"""
+    print(f"✅ {len(vectors)} 件のベクトルを取得")
+    return vectors
+
+
+def compute_distance_matrix(vectors: dict[int, np.ndarray]) -> tuple[list[int], np.ndarray]:
+    """コサイン距離行列を作成（MDSにはdissimilarity=距離が必要）"""
     ids = list(vectors.keys())
-    vec_list = np.array([vectors[i] for i in ids])
+    n = len(ids)
+    dist_matrix = np.zeros((n, n), dtype=np.float64)
 
-    # コサイン類似度行列の計算
-    similarity_matrix = np.zeros((len(ids), len(ids)))
-
-    for i in range(len(ids)):
-        for j in range(len(ids)):
+    for i in range(n):
+        for j in range(n):
             if i != j:
-                similarity_matrix[i, j] = 1 - cosine(vec_list[i].ravel(), vec_list[j].ravel())  # 修正
+                # cosine()はコサイン距離（1 - コサイン類似度）を返す
+                dist_matrix[i, j] = cosine(vectors[ids[i]], vectors[ids[j]])
 
-    return ids, similarity_matrix
+    # 対称性を確保（数値誤差対策）
+    dist_matrix = (dist_matrix + dist_matrix.T) / 2
+    np.fill_diagonal(dist_matrix, 0.0)
 
-def compute_mds(similarity_matrix, n_components=3):
-    """コサイン類似度行列を MDS により 3D 座標へ変換"""
-    mds = MDS(n_components=n_components, dissimilarity="precomputed", random_state=42)
-    coords = mds.fit_transform(1 - similarity_matrix)  # コサイン類似度を距離として扱うため、1 - 類似度
+    print(f"距離行列:\n{dist_matrix.round(4)}")
+    return ids, dist_matrix
+
+
+def compute_mds(dist_matrix: np.ndarray, n_components: int = 3) -> np.ndarray:
+    """距離行列からMDSで3D座標を計算"""
+    n = dist_matrix.shape[0]
+
+    if n < 2:
+        print("⚠️ データが1件のみ → 原点に配置")
+        return np.zeros((n, 3))
+
+    if n == 2:
+        # 2件の場合はMDSが不安定なので手動配置
+        d = dist_matrix[0, 1]
+        coords = np.array([[0, 0, 0], [float(d), 0, 0]], dtype=np.float64)
+        return coords
+
+    # 3件以上は通常のMDS
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # RuntimeWarningを抑制
+        mds = MDS(
+            n_components=n_components,
+            dissimilarity="precomputed",
+            random_state=42,
+            normalized_stress=False,
+            n_init=4,
+            max_iter=300,
+        )
+        coords = mds.fit_transform(dist_matrix)
+
     return coords
 
-def update_mds_coordinates(ids, coords):
-    """MDS で得た 3D 座標を Supabase に登録"""
-    for i, id in enumerate(ids):
-        x, y, z = coords[i]
-        response = supabase.table("websites").update({
-            "mds_coordinates": [x, y, z]  # 3D 座標をリストとして保存
-        }).eq("id", id).execute()
+
+def update_mds_coordinates(ids: list[int], coords: np.ndarray) -> None:
+    """3D座標をSupabaseに保存（Python float に変換して保存）"""
+    for i, id_ in enumerate(ids):
+        # numpy.float64 → Python float に変換（Supabaseとの互換性のため）
+        x, y, z = float(coords[i, 0]), float(coords[i, 1]), float(coords[i, 2])
+        supabase.table("websites").update({
+            "mds_coordinates": [x, y, z]
+        }).eq("id", id_).execute()
+        print(f"✅ ID {id_}: ({x:.4f}, {y:.4f}, {z:.4f})")
 
 
-# データ取得と類似度計算
-vectors = fetch_vectors()
-if vectors:
-    ids, similarity_matrix = compute_cosine_similarity(vectors)
+def main() -> None:
+    vectors = fetch_vectors()
+    if not vectors:
+        print("❌ ベクトルデータがありません")
+        return
 
-    # MDS で 3D 座標取得
-    coords = compute_mds(similarity_matrix)
+    ids, dist_matrix = compute_distance_matrix(vectors)
 
-    # Supabase に 3D 座標を登録
+    coords = compute_mds(dist_matrix)
+    print(f"\nMDS座標:\n{coords.round(4)}")
+
     update_mds_coordinates(ids, coords)
+    print("\n✅ MDS座標の登録完了！")
 
-    print("MDS 座標の登録が完了しました！")
+
+if __name__ == "__main__":
+    main()
