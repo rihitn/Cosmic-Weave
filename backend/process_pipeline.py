@@ -1,80 +1,85 @@
 import os
 import subprocess
+import sys
+from pathlib import Path
+
 from flask import Flask, jsonify
 from flask_cors import CORS
-from supabase import create_client
 from dotenv import load_dotenv
+from supabase import create_client
 
-# 環境変数をロード
-load_dotenv()
+# .envのパスを明示的に指定（このファイルと同じディレクトリ）
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-# 環境変数が正しく設定されているか確認
 if not SUPABASE_URL or not SUPABASE_KEY:
-    raise ValueError("Supabase の環境変数が正しく設定されていません！")
+    raise ValueError(
+        f"Supabase の環境変数が設定されていません。\n"
+        f"SUPABASE_URL: {SUPABASE_URL}\n"
+        f"SUPABASE_KEY: {'設定済み' if SUPABASE_KEY else '未設定'}\n"
+        f".envファイルのパス: {BASE_DIR / '.env'}"
+    )
 
-# Supabase クライアントの作成
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route("/", methods=["GET"])
 def index():
-    """ヘルスチェック用のルート"""
     return jsonify({"status": "ok"})
 
-def run_script(script_name):
-    """ 指定されたスクリプトを実行（リアルタイムでログを出力） """
-    script_path = os.path.join("backend", script_name)
+
+def run_script(script_name: str) -> dict:
+    """指定されたスクリプトをvenvのPythonで実行"""
+    script_path = BASE_DIR / script_name
     try:
-        process = subprocess.Popen(
-            ["python", script_path],
+        result = subprocess.run(
+            [sys.executable, str(script_path)],  # venvのPythonを使う
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            encoding="utf-8"
+            encoding="utf-8",
+            check=False,
+            cwd=str(BASE_DIR),  # backend/ディレクトリで実行
         )
-        stdout, stderr = process.communicate()
-
-        if process.returncode == 0:
-            return {"status": "success", "output": stdout}
-        else:
-            return {"status": "error", "output": stderr}
-
+        if result.returncode == 0:
+            return {"status": "success", "output": result.stdout}
+        # エラーの場合はstdoutとstderrの両方を返す
+        return {"status": "error", "output": result.stdout + result.stderr}
     except Exception as e:
         return {"status": "error", "output": str(e)}
 
+
 @app.route("/process_pipeline", methods=["POST", "GET"])
 def process_pipeline():
-    """
-    Supabase に URL が追加されたら、パイプライン処理を実行。
-    1. main.py → 2. embedding.py → 3. similarity.py を順番に実行
-    """
     try:
-        # Supabase から新しい URL を取得
-        response = supabase.table("websites").select("id, url").order("created_at", desc=True).limit(1).execute()
+        response = (
+            supabase.table("websites")
+            .select("id, url")
+            .order("created_at", desc=True)
+            .limit(1)
+            .execute()
+        )
 
-        if not response or not response.data or len(response.data) == 0:
-            return jsonify({"status": "error", "message": "No new URL found in database"}), 400
+        if not response.data:
+            return jsonify({"status": "error", "message": "データベースにURLがありません"}), 400
 
-        new_url_id = response.data[0]["id"]
         new_url = response.data[0]["url"]
-        print(f"Processing new URL: {new_url} (ID: {new_url_id})")
+        print(f"Processing: {new_url}")
 
-        # Step 1: main.py を実行
         print("Running main.py...")
         main_result = run_script("main.py")
         print(main_result["output"])
 
-        # Step 2: embedding.py を実行
         print("Running embedding.py...")
         embedding_result = run_script("embedding.py")
         print(embedding_result["output"])
 
-        # Step 3: similarity.py を実行
         print("Running similarity.py...")
         similarity_result = run_script("similarity.py")
         print(similarity_result["output"])
@@ -85,20 +90,21 @@ def process_pipeline():
             "steps": {
                 "main.py": main_result,
                 "embedding.py": embedding_result,
-                "similarity.py": similarity_result
-            }
+                "similarity.py": similarity_result,
+            },
         })
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
 @app.route("/config", methods=["GET"])
 def get_config():
-    """Cloud Runの環境変数をフロントエンドに提供"""
     return jsonify({
         "SUPABASE_URL": os.getenv("SUPABASE_URL", ""),
-        "SUPABASE_KEY": os.getenv("SUPABASE_KEY", "")
+        "SUPABASE_KEY": os.getenv("SUPABASE_KEY", ""),
     })
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
