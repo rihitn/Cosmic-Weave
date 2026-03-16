@@ -77,10 +77,14 @@ async function addUrl() {
       if (result.status === "success") {
         window.location.href = "/index.html"; // 処理完了後にリダイレクト
       } else {
-        alert("パイプラインの実行に失敗しました");
+        const detail = result.step
+          ? `ステップ: ${result.step}\n${result.output || result.message || ""}`
+          : result.message || JSON.stringify(result);
+        alert(`パイプラインの実行に失敗しました\n\n${detail}`);
       }
     } catch (err) {
       console.error("Pipelineの実行に失敗:", err);
+      alert(`パイプラインの実行に失敗しました\n\n${err.message}`);
     }
   }
 }
