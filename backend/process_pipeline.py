@@ -75,14 +75,20 @@ def process_pipeline():
         print("Running main.py...")
         main_result = run_script("main.py")
         print(main_result["output"])
+        if main_result["status"] == "error":
+            return jsonify({"status": "error", "step": "main.py", "output": main_result["output"]}), 500
 
         print("Running embedding.py...")
         embedding_result = run_script("embedding.py")
         print(embedding_result["output"])
+        if embedding_result["status"] == "error":
+            return jsonify({"status": "error", "step": "embedding.py", "output": embedding_result["output"]}), 500
 
         print("Running similarity.py...")
         similarity_result = run_script("similarity.py")
         print(similarity_result["output"])
+        if similarity_result["status"] == "error":
+            return jsonify({"status": "error", "step": "similarity.py", "output": similarity_result["output"]}), 500
 
         return jsonify({
             "status": "success",
