@@ -67,7 +67,7 @@ async function addUrl() {
     console.log("パイプラインを実行します");
     try {
       const response = await fetch(
-        "https://cosmic-weave-604389536871.us-central1.run.app/process_pipeline",
+        "https://cosmic-weave-backend-604389536871.asia-northeast1.run.app/process_pipeline",
         {
           method: "POST",
         }
