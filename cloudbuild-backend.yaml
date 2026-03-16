@@ -21,7 +21,7 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--set-env-vars'
-      - 'SUPABASE_URL=https://aluhxbxlhszfceftzdtp.supabase.co,SUPABASE_KEY=REMOVED_SUPABASE_SERVICE_KEY,OPENAI_API_KEY=REMOVED_OPENAI_KEY'
+      - 'SUPABASE_URL=https://aluhxbxlhszfceftzdtp.supabase.co,SUPABASE_KEY=$_SUPABASE_KEY,OPENAI_API_KEY=$_OPENAI_API_KEY'
 
 images:
   - 'gcr.io/$PROJECT_ID/cosmic-weave-backend'
