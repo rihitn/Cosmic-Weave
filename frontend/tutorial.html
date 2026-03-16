@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>使い方 — Cosmic Weave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: #000010;
+        color: #e0e8ff;
+        font-family: sans-serif;
+        min-height: 100vh;
+      }
+
+      /* 背景の星 */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+          radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.6) 0%, transparent 100%),
+          radial-gradient(1px 1px at 50% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+          radial-gradient(1px 1px at 80% 20%, rgba(255,255,255,0.5) 0%, transparent 100%),
+          radial-gradient(1px 1px at 35% 85%, rgba(255,255,255,0.3) 0%, transparent 100%),
+          radial-gradient(1px 1px at 65% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
+          radial-gradient(2px 2px at 10% 60%, rgba(100,180,255,0.3) 0%, transparent 100%),
+          radial-gradient(2px 2px at 90% 50%, rgba(100,180,255,0.25) 0%, transparent 100%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* ヘッダー */
+      header {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        background: rgba(4, 8, 24, 0.7);
+        backdrop-filter: blur(18px);
+        border-bottom: 1px solid rgba(100, 180, 255, 0.1);
+        z-index: 100;
+      }
+      header img {
+        height: 50px;
+        filter: drop-shadow(0 0 8px rgba(100,180,255,0.25));
+        cursor: pointer;
+      }
+      .back-btn {
+        padding: 7px 18px;
+        background: rgba(74, 109, 167, 0.25);
+        color: #b8cef0;
+        border: 1px solid rgba(74, 109, 167, 0.4);
+        border-radius: 6px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .back-btn:hover {
+        background: rgba(74, 109, 167, 0.5);
+        box-shadow: 0 0 14px rgba(100,149,237,0.4);
+        color: #d0e4ff;
+      }
+
+      /* メインコンテンツ */
+      main {
+        position: relative;
+        z-index: 1;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 100px 24px 80px;
+      }
+
+      .page-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 22px;
+        letter-spacing: 4px;
+        color: #c8d8ff;
+        text-align: center;
+        margin: 0 0 8px;
+        text-shadow: 0 0 20px rgba(100,180,255,0.4);
+      }
+      .page-subtitle {
+        font-size: 13px;
+        color: rgba(150,190,255,0.5);
+        text-align: center;
+        letter-spacing: 2px;
+        margin: 0 0 52px;
+      }
+
+      /* セクション */
+      .section {
+        background: rgba(5, 10, 30, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(100, 180, 255, 0.12);
+        border-radius: 14px;
+        padding: 28px 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+      }
+      .section-icon {
+        font-size: 22px;
+        width: 44px; height: 44px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(74, 109, 167, 0.2);
+        border: 1px solid rgba(100, 180, 255, 0.15);
+        border-radius: 10px;
+        flex-shrink: 0;
+      }
+      .section-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 13px;
+        letter-spacing: 2px;
+        color: #b8cef0;
+        margin: 0;
+      }
+      .section-desc {
+        font-size: 12px;
+        color: rgba(150,185,255,0.45);
+        margin: 2px 0 0;
+        letter-spacing: 0.5px;
+      }
+
+      /* ステップ */
+      .steps {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .step {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .step-num {
+        width: 24px; height: 24px;
+        background: rgba(74, 109, 167, 0.35);
+        border: 1px solid rgba(100, 180, 255, 0.3);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 10px;
+        color: #93c5fd;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      .step-text {
+        font-size: 13px;
+        line-height: 1.7;
+        color: rgba(200, 220, 255, 0.85);
+      }
+      .step-text strong {
+        color: #c8d8ff;
+        font-weight: 600;
+      }
+
+      /* キーボードショートカット */
+      .kbd-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .kbd-table tr {
+        border-bottom: 1px solid rgba(100,180,255,0.06);
+      }
+      .kbd-table tr:last-child { border-bottom: none; }
+      .kbd-table td {
+        padding: 9px 4px;
+        font-size: 13px;
+        color: rgba(200, 220, 255, 0.8);
+      }
+      .kbd-table td:first-child {
+        width: 40%;
+      }
+      kbd {
+        display: inline-block;
+        padding: 2px 8px;
+        background: rgba(74, 109, 167, 0.25);
+        border: 1px solid rgba(100, 180, 255, 0.25);
+        border-radius: 4px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 10px;
+        color: #93c5fd;
+        letter-spacing: 1px;
+      }
+
+      /* お気に入りの星サンプル */
+      .star-sample {
+        display: inline-block;
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        vertical-align: middle;
+        margin-right: 4px;
+        box-shadow: 0 0 6px currentColor;
+      }
+      .star-white  { background: #ffffff; color: #ffffff; }
+      .star-gold   { background: #FFD700; color: #FFD700; }
+      .star-yellow { background: #ffff00; color: #ffff00; }
+
+      /* ヒントバナー */
+      .tip {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        background: rgba(74, 109, 167, 0.12);
+        border: 1px solid rgba(100, 180, 255, 0.15);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-top: 16px;
+        font-size: 12px;
+        color: rgba(180, 210, 255, 0.75);
+        line-height: 1.6;
+      }
+      .tip-icon { flex-shrink: 0; font-size: 14px; }
+
+      /* フッター */
+      footer {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        padding: 0 0 40px;
+        font-size: 11px;
+        color: rgba(130,160,220,0.3);
+        letter-spacing: 1px;
+        font-family: 'Orbitron', sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="/CosmicWeaveLogo.png" onclick="location.href='/index.html'" />
+      <a class="back-btn" href="/index.html">← Back</a>
+    </header>
+
+    <main>
+      <h1 class="page-title">HOW TO USE</h1>
+      <p class="page-subtitle">Cosmic Weave の使い方</p>
+
+      <!-- 概要 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">🌌</div>
+          <div>
+            <h2 class="section-title">Cosmic Weave とは</h2>
+            <p class="section-desc">宇宙空間に広がるウェブサイトの星座</p>
+          </div>
+        </div>
+        <div class="step-text">
+          Cosmic Weave は、あなたのお気に入りのウェブサイトを<strong>3D空間の星</strong>として可視化するサービスです。
+          内容が似ているサイト同士は近くに配置され、異なるサイトは遠くに配置されます。
+          星座を眺めるように、ウェブの世界を探索してみてください。
+        </div>
+      </div>
+
+      <!-- ナビゲーション -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">🖱️</div>
+          <div>
+            <h2 class="section-title">画面の操作</h2>
+            <p class="section-desc">3D空間を自由に探索する</p>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text"><strong>ドラッグ</strong> — 宇宙空間を回転させます</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>スクロール</strong> — ズームイン / ズームアウトします</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text"><strong>星にホバー</strong> — サイト名が表示されます</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-text"><strong>星をクリック</strong> — サイト情報のポップアップが表示されます</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- URL追加 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">➕</div>
+          <div>
+            <h2 class="section-title">URLを追加する</h2>
+            <p class="section-desc">新しい星を宇宙に加える</p>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">ヘッダー中央のボタンをクリック（またはキーボードの <kbd>/</kbd>）でフォームを開く</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text"><strong>ログイン</strong>が必要です。右上の「login」ボタンから Google アカウントでログインしてください</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">「単体」タブ：URLを1件入力して <strong>add</strong> ボタンをクリック</div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-text">「一括」タブ：複数のURLを1行1件で入力して <strong>一括追加</strong> をクリック</div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-text">AIがサイトの内容を解析し、類似度に基づいて星を配置します（数十秒〜数分かかります）</div>
+          </div>
+        </div>
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          URL入力中に重複チェックが自動で行われます。登録済みのURLは「⚠️ 登録済み」と表示されます。
+        </div>
+      </div>
+
+      <!-- 検索 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">🔍</div>
+          <div>
+            <h2 class="section-title">検索する</h2>
+            <p class="section-desc">星を名前やURLで探す</p>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">フォームを開き（<kbd>/</kbd>）、上部の <strong>Search</strong> 欄にキーワードを入力</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">候補をクリックすると、該当の星が<span class="star-sample star-yellow"></span><strong>黄色</strong>にハイライトされます</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- お気に入り -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">⭐</div>
+          <div>
+            <h2 class="section-title">お気に入り</h2>
+            <p class="section-desc">大切な星を守る</p>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              星をクリックしてポップアップを開き、<strong>☆ お気に入り</strong> ボタンをクリック
+              （または星を<strong>右クリック</strong>でも切り替え可能）
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              お気に入りの星は<span class="star-sample star-gold"></span><strong>金色</strong>になり、ゆっくりパルスします
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              お気に入りに登録した星は、<strong>自分で解除しない限り削除できません</strong>（他のユーザーからも保護されます）
+            </div>
+          </div>
+        </div>
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          右上の <strong>menu</strong> からお気に入りの一覧を確認できます。☆ / ⭐ ボタンでその場で切り替えも可能です。
+        </div>
+      </div>
+
+      <!-- メニュー -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">📋</div>
+          <div>
+            <h2 class="section-title">メニュー</h2>
+            <p class="section-desc">登録済みURLの一覧を管理する</p>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-text">右上の <strong>menu</strong> ボタンで右側にパネルが開きます</div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-text">各URLの <strong>削除</strong> ボタンで星を削除できます（お気に入り登録中の星は削除不可）</div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-text">左上の HUD には「Stars（全体）/ My Stars（自分が追加）/ Favorites（お気に入り）」の件数が表示されます</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- キーボードショートカット -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">⌨️</div>
+          <div>
+            <h2 class="section-title">キーボードショートカット</h2>
+            <p class="section-desc">素早く操作する</p>
+          </div>
+        </div>
+        <table class="kbd-table">
+          <tr>
+            <td><kbd>/</kbd></td>
+            <td>フォームを開く・検索欄にフォーカス</td>
+          </tr>
+          <tr>
+            <td><kbd>Esc</kbd></td>
+            <td>フォームまたはポップアップを閉じる</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- 星の色 -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-icon">🎨</div>
+          <div>
+            <h2 class="section-title">星の色の意味</h2>
+            <p class="section-desc">星が語るもの</p>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num"></div>
+            <div class="step-text"><span class="star-sample star-white"></span><strong>白</strong> — 通常の星（登録済みサイト）</div>
+          </div>
+          <div class="step">
+            <div class="step-num"></div>
+            <div class="step-text"><span class="star-sample star-gold"></span><strong>金色（パルスあり）</strong> — お気に入り登録済み</div>
+          </div>
+          <div class="step">
+            <div class="step-num"></div>
+            <div class="step-text"><span class="star-sample star-yellow"></span><strong>黄色</strong> — 検索でハイライト中</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <footer>COSMIC WEAVE &nbsp;·&nbsp; TUTORIAL</footer>
+  </body>
+</html>
