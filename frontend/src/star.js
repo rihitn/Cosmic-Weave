@@ -1,5 +1,6 @@
-import { waitForSupabase, fetchStar } from "./supabase.js";
+import { waitForSupabase, fetchStar, fetchFavorites, toggleFavorite, refreshUrls } from "./supabase.js";
 import { formIsActive, setFormIsActive, getFormIsActive, toggleAddForm } from './menu.js';
+import { getCurrentUser } from './auth.js';
 
 //three
 import * as THREE from "three";
@@ -76,12 +77,23 @@ async function generateStar() {
     clickableStars.push(clickable);
 
     stars.push({
+      id: item.id,
       position: new THREE.Vector3(...position),
       star,
       material,
       url: item.url,
       title: item.title,
+      isFavorited: false,
     });
+  });
+
+  // お気に入りの星を金色に
+  const favIds = await fetchFavorites();
+  stars.forEach(starData => {
+    if (favIds.has(starData.id)) {
+      starData.isFavorited = true;
+      starData.material.color.set(0xFFD700);
+    }
   });
 
   geometry.setAttribute(
@@ -217,6 +229,36 @@ window.addEventListener("click", (event) => {
   }
 });
 
+
+// 右クリックでお気に入りトグル
+window.addEventListener("contextmenu", async (event) => {
+  if (getFormIsActive()) return;
+  event.preventDefault();
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(clickableStars);
+  if (intersects.length === 0) return;
+
+  const star = intersects[0].object.userData.linkedStar;
+  const starDataItem = stars.find(s => s.star === star);
+  if (!starDataItem) return;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    alert("お気に入りにはログインが必要です");
+    return;
+  }
+
+  const result = await toggleFavorite(starDataItem.id);
+  if (result === true) {
+    starDataItem.isFavorited = true;
+    starDataItem.material.color.set(0xFFD700);
+  } else if (result === false) {
+    starDataItem.isFavorited = false;
+    starDataItem.material.color.set(0xffffff);
+  }
+  refreshUrls();
+});
 
 let prevCameraDistance = camera.position.distanceTo(controls.target);
 let lastZoomPercent = 100;

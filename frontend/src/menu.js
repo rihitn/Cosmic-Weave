@@ -1,4 +1,5 @@
-import { insertUrl } from "./supabase";
+import { insertUrl } from "./supabase.js";
+import { getCurrentUser } from "./auth.js";
 
 function toggleMenu() {
   const menu = document.getElementById("menu");
@@ -54,6 +55,11 @@ addButton.addEventListener("click", toggleAddForm);
 
 // URLを追加する関数
 async function addUrl() {
+  const user = await getCurrentUser();
+  if (!user) {
+    alert("URLを追加するにはログインが必要です");
+    return;
+  }
   const url = document.getElementById("url").value;
   if (!url) {
     alert("URLを入力してください");

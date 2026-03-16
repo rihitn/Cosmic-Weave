@@ -22,9 +22,7 @@
       <buttton class="add-urls-button"></buttton>
       <div class="right-button">
         <button class="menu-button">menu</button>
-        <button onclick="loginWithGoogle()" class="login-button">
-          login
-        </button>
+        <button id="auth-btn" class="login-button">login</button>
       </div>
       
     </header>
@@ -65,8 +63,8 @@
     <script type="module" src="/src/star.js"></script>
     <script type="module" src="/src/menu.js"></script>
     <script type="module">
-      import { loginWithGoogle } from '/src/auth.js';
-      window.loginWithGoogle = loginWithGoogle;
+      import { initAuth } from '/src/auth.js';
+      initAuth();
     </script>
   </body>
 </html>
