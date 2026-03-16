@@ -70,6 +70,34 @@ export async function toggleFavorite(websiteId) {
   }
 }
 
+export async function insertUrls(urls) {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // 既存URLを取得してスキップ対象を特定
+  const { data: existing } = await supabase
+    .from("websites")
+    .select("url")
+    .in("url", urls);
+  const existingSet = new Set((existing || []).map(r => r.url));
+  const newUrls = urls.filter(u => !existingSet.has(u));
+
+  if (newUrls.length === 0) {
+    return { added: 0, skipped: existingSet.size, error: null };
+  }
+
+  const rows = newUrls.map(url => ({
+    url,
+    created_at: new Date(),
+    added_by: session?.user?.id ?? null,
+  }));
+
+  const { error } = await supabase.from("websites").insert(rows);
+  if (error) return { added: 0, skipped: existingSet.size, error };
+
+  loadUrls();
+  return { added: newUrls.length, skipped: existingSet.size, error: null };
+}
+
 export async function insertUrl(url) {
   const { data: { session } } = await supabase.auth.getSession();
   const { data, error } = await supabase

@@ -39,10 +39,15 @@
         <input type="text" id="search-input" placeholder="キーワードを入力して検索" autocomplete="off" />
         <div id="search-results" class="search-results"></div>
       </div>
-      <div class="url-form">
-        <div class="url-header">
-          <h3 class="strings">Add URL</h3>
-        </div>
+
+      <!-- タブ -->
+      <div class="url-tabs">
+        <button class="url-tab active" data-tab="single">単体</button>
+        <button class="url-tab" data-tab="bulk">一括</button>
+      </div>
+
+      <!-- 単体追加 -->
+      <div class="url-form" id="tab-single">
         <input
           type="url"
           id="url"
@@ -54,6 +59,18 @@
         <div id="url-preview" class="url-preview"></div>
         <button class="addUrl-button">add</button>
         <div class="kbd-hint">/ で開く &nbsp;·&nbsp; Esc で閉じる</div>
+      </div>
+
+      <!-- 一括追加 -->
+      <div class="url-form" id="tab-bulk" style="display:none">
+        <textarea
+          id="bulk-urls"
+          class="bulk-textarea"
+          placeholder="URLを1行に1つずつ入力&#10;https://example.com&#10;https://another.com"
+          rows="6"
+        ></textarea>
+        <div id="bulk-status" class="url-preview"></div>
+        <button class="addUrl-button" id="bulk-add-btn">一括追加</button>
       </div>
     </div>
 

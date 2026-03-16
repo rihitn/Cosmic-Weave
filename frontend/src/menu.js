@@ -1,4 +1,4 @@
-import { insertUrl, supabase } from "./supabase.js";
+import { insertUrl, insertUrls, supabase } from "./supabase.js";
 import { getCurrentUser } from "./auth.js";
 
 function toggleMenu() {
@@ -97,6 +97,81 @@ async function addUrl() {
 
 const addUrlButton = document.querySelector(".addUrl-button");
 addUrlButton.addEventListener("click", addUrl);
+
+// === タブ切り替え ===
+document.querySelectorAll(".url-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".url-tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    const target = tab.dataset.tab;
+    document.getElementById("tab-single").style.display = target === "single" ? "block" : "none";
+    document.getElementById("tab-bulk").style.display   = target === "bulk"   ? "block" : "none";
+  });
+});
+
+// === 一括追加 ===
+const bulkAddBtn = document.getElementById("bulk-add-btn");
+const bulkStatus = document.getElementById("bulk-status");
+
+bulkAddBtn.addEventListener("click", async () => {
+  const user = await getCurrentUser();
+  if (!user) { alert("URLを追加するにはログインが必要です"); return; }
+
+  const raw = document.getElementById("bulk-urls").value.trim();
+  if (!raw) { alert("URLを入力してください"); return; }
+
+  const urls = raw.split("\n")
+    .map(l => l.trim())
+    .filter(l => l.startsWith("http://") || l.startsWith("https://"));
+
+  if (urls.length === 0) { alert("有効なURLがありません（http:// または https:// で始まる行が必要です）"); return; }
+
+  bulkStatus.textContent = `${urls.length}件を確認中...`;
+  bulkStatus.className = "url-preview checking";
+  bulkAddBtn.disabled = true;
+
+  const { added, skipped, error } = await insertUrls(urls);
+
+  if (error) {
+    bulkStatus.textContent = "エラーが発生しました";
+    bulkStatus.className = "url-preview duplicate";
+    bulkAddBtn.disabled = false;
+    return;
+  }
+
+  if (added === 0) {
+    bulkStatus.textContent = `全て登録済みでした（${skipped}件スキップ）`;
+    bulkStatus.className = "url-preview duplicate";
+    bulkAddBtn.disabled = false;
+    return;
+  }
+
+  bulkStatus.textContent = `${added}件追加完了、パイプライン実行中...`;
+  bulkStatus.className = "url-preview checking";
+
+  try {
+    const response = await fetch(
+      "https://cosmic-weave-backend-604389536871.asia-northeast1.run.app/process_pipeline",
+      { method: "POST" }
+    );
+    const result = await response.json();
+    if (result.status === "success") {
+      window.location.href = "/index.html";
+    } else {
+      const detail = result.step
+        ? `ステップ: ${result.step}\n${result.output || result.message || ""}`
+        : result.message || JSON.stringify(result);
+      bulkStatus.textContent = `追加: ${added}件、スキップ: ${skipped}件（パイプライン失敗）`;
+      bulkStatus.className = "url-preview duplicate";
+      console.error("Pipeline error:", detail);
+    }
+  } catch (err) {
+    bulkStatus.textContent = `追加: ${added}件、スキップ: ${skipped}件（パイプライン失敗: ${err.message}）`;
+    bulkStatus.className = "url-preview duplicate";
+  }
+
+  bulkAddBtn.disabled = false;
+});
 
 // === URL 重複チェック & プレビュー ===
 const urlInput   = document.getElementById("url");
