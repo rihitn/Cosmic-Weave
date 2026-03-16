@@ -1,8 +1,7 @@
 import { waitForSupabase, fetchStar, fetchFavorites, toggleFavorite, refreshUrls } from "./supabase.js";
-import { formIsActive, setFormIsActive, getFormIsActive, toggleAddForm } from './menu.js';
+import { getFormIsActive, toggleAddForm } from './menu.js';
 import { getCurrentUser } from './auth.js';
 
-//three
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -10,20 +9,13 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const scene = new THREE.Scene();
-
 const loader = new THREE.TextureLoader();
-
-loader.load("/CosB3.png", function (texture) {
+loader.load("/CosB3.png", (texture) => {
   scene.background = texture;
   texture.colorSpace = THREE.SRGBColorSpace;
 });
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 90;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -35,7 +27,6 @@ document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
-//線の描写に必要
 const geometry = new THREE.BufferGeometry();
 const stars = [];
 const clickableStars = [];
@@ -46,34 +37,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function generateStar() {
   const data = await fetchStar();
-  console.log(data);
   const vertices = [];
 
-  data.forEach((item, index) => {
+  data.forEach((item) => {
     const originalPosition = item.mds_coordinates;
-
     const position = [
       originalPosition[0] * 100,
       originalPosition[1] * 100,
       originalPosition[2] * 100,
     ];
-
-    vertices.push(position[0], position[1], position[2]);
+    vertices.push(...position);
 
     const starGeometry = new THREE.SphereGeometry(1.2, 16, 16);
     const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const star = new THREE.Mesh(starGeometry, material);
-    star.position.set(position[0], position[1], position[2]);
-
+    star.position.set(...position);
     scene.add(star);
 
-    const clickableGeometry = new THREE.SphereGeometry(4.0, 8, 8); // ← 判定サイズ拡大
-    const clickableMaterial = new THREE.MeshBasicMaterial({ visible: false }); // 非表示
+    const clickableGeometry = new THREE.SphereGeometry(4.0, 8, 8);
+    const clickableMaterial = new THREE.MeshBasicMaterial({ visible: false });
     const clickable = new THREE.Mesh(clickableGeometry, clickableMaterial);
     clickable.position.set(...position);
-    clickable.userData.linkedStar = star; // 元の星を参照
+    clickable.userData.linkedStar = star;
     scene.add(clickable);
-
     clickableStars.push(clickable);
 
     stars.push({
@@ -96,57 +82,36 @@ async function generateStar() {
     }
   });
 
-  geometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(vertices, 3)
-  );
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
 
+  // 近い星を線で結ぶ
   for (let i = 0; i < stars.length; i++) {
     for (let j = i + 1; j < stars.length; j++) {
-      const distance = Math.sqrt(
-        (stars[j].position.x - stars[i].position.x) ** 2 +
-          (stars[j].position.y - stars[i].position.y) ** 2 +
-          (stars[j].position.z - stars[i].position.z) ** 2
-      );
-
-      if (distance <= 25) {
-        const start = stars[i].position;
-        const end = stars[j].position;
-
-        const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-          start,
-          end,
-        ]);
-        const lineMaterial = new THREE.LineBasicMaterial({
-          color: 0xcccccc,
-          opacity: 0.5,
-          transparent: true,
-        });
-        const line = new THREE.Line(lineGeometry, lineMaterial);
-
-        scene.add(line);
+      const d = stars[i].position.distanceTo(stars[j].position);
+      if (d <= 25) {
+        const lineGeometry = new THREE.BufferGeometry().setFromPoints([stars[i].position, stars[j].position]);
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xcccccc, opacity: 0.5, transparent: true });
+        scene.add(new THREE.Line(lineGeometry, lineMaterial));
       }
     }
   }
 }
 
-//一等級のエフェクト
+// ポストプロセス
 const firstComposer = new EffectComposer(renderer);
 firstComposer.addPass(new RenderPass(scene, camera));
-const firstBloomPass = new UnrealBloomPass(
+firstComposer.addPass(new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
-  1.0, // 発光の強さ
-  0.4, // 発光の範囲
-  0.85 // 明るさのしきい値
-);
-firstComposer.addPass(firstBloomPass);
+  1.0, 0.4, 0.85
+));
 
-//クリック、ホバー時の処理
+// Raycaster / mouse
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let hoveredStar = null;
 const urlDisplay = document.getElementById("url-display");
 
+// ホバー処理
 window.addEventListener("mousemove", (event) => {
   if (getFormIsActive()) return;
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -156,47 +121,30 @@ window.addEventListener("mousemove", (event) => {
   const intersects = raycaster.intersectObjects(clickableStars);
 
   if (intersects.length > 0) {
-    document.body.style.cursor = "pointer"; 
-
-    // intersectsが空でない場合にのみ処理を進める
+    document.body.style.cursor = "pointer";
     const first = intersects[0].object.userData.linkedStar;
-
     if (hoveredStar !== first) {
-      // 前のホバーを戻す
       if (hoveredStar) {
         hoveredStar.scale.set(1, 1, 1);
         urlDisplay.style.visibility = "hidden";
       }
-      // 新しくホバーされた星を強調
       hoveredStar = first;
-      hoveredStar.scale.set(1.5, 1.5, 1.5); // 拡大
-      const starDataItem = stars.find((s) => s.star === first);
+      hoveredStar.scale.set(1.5, 1.5, 1.5);
+      const starDataItem = stars.find(s => s.star === first);
       if (starDataItem) {
-        //title があればそれを表示、なければ URL
-        const displayText =
-          starDataItem.title && starDataItem.title.trim() !== ""
-            ? starDataItem.title
-            : starDataItem.url;
-
+        const displayText = starDataItem.title?.trim() || starDataItem.url;
         urlDisplay.textContent = `🔗 ${displayText}`;
         urlDisplay.style.visibility = "visible";
 
-        //星のスクリーン座標を取得し、#url-display を星の右側に配置
-        const starPosition = first.position.clone();
-        starPosition.project(camera); // 3D座標をスクリーン座標に変換
-
-        const screenX = (starPosition.x * 0.5 + 0.5) * window.innerWidth;
-        const screenY = (-starPosition.y * 0.5 + 0.5) * window.innerHeight;
-
-        urlDisplay.style.left = `${screenX + 20}px`; // 星の右側に 20px 移動
-        urlDisplay.style.top = `${screenY}px`;
+        const pos = first.position.clone().project(camera);
+        const sx = (pos.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+        urlDisplay.style.left = `${sx + 20}px`;
+        urlDisplay.style.top  = `${sy}px`;
       }
     }
   } else {
-    document.body.style.cursor = "default"; // ← ホバーが外れたときに戻す
-
-
-    // どこにもホバーしてないならリセット
+    document.body.style.cursor = "default";
     if (hoveredStar) {
       hoveredStar.scale.set(1, 1, 1);
       urlDisplay.style.visibility = "hidden";
@@ -205,30 +153,74 @@ window.addEventListener("mousemove", (event) => {
   }
 });
 
-// マウスクリックで星の色をトグルおよびURL遷移
+// === STAR POPUP ===
+const starPopup   = document.getElementById("star-popup");
+const popupTitle  = document.getElementById("popup-title");
+const popupUrl    = document.getElementById("popup-url");
+const popupFavStatus = document.getElementById("popup-fav-status");
+const popupOpen   = document.getElementById("popup-open");
+const popupFavToggle = document.getElementById("popup-fav-toggle");
+const popupClose  = document.getElementById("popup-close");
+let activePopupStar = null;
+
+function showPopup(starDataItem) {
+  activePopupStar = starDataItem;
+  popupTitle.textContent = starDataItem.title?.trim() || starDataItem.url;
+  const shortUrl = starDataItem.url.length > 55
+    ? starDataItem.url.slice(0, 55) + "…"
+    : starDataItem.url;
+  popupUrl.href = starDataItem.url;
+  popupUrl.textContent = shortUrl;
+  _refreshPopupFav(starDataItem);
+  starPopup.style.display = "block";
+}
+
+function _refreshPopupFav(starDataItem) {
+  if (starDataItem.isFavorited) {
+    popupFavStatus.textContent = "⭐ お気に入り登録済み";
+    popupFavToggle.textContent = "⭐ 解除";
+  } else {
+    popupFavStatus.textContent = "";
+    popupFavToggle.textContent = "☆ お気に入り";
+  }
+  popupFavToggle.onclick = async () => {
+    const user = await getCurrentUser();
+    if (!user) { alert("お気に入りにはログインが必要です"); return; }
+    const result = await toggleFavorite(starDataItem.id);
+    if (result === true)  { starDataItem.isFavorited = true;  starDataItem.material.color.set(0xFFD700); }
+    if (result === false) { starDataItem.isFavorited = false; starDataItem.material.color.set(0xffffff); }
+    _refreshPopupFav(starDataItem);
+    refreshUrls();
+  };
+}
+
+function hidePopup() {
+  starPopup.style.display = "none";
+  activePopupStar = null;
+}
+
+popupClose.addEventListener("click", hidePopup);
+popupOpen.addEventListener("click", () => {
+  if (activePopupStar) window.open(activePopupStar.url, "_blank");
+  hidePopup();
+});
+
+// クリックで星のポップアップを表示
 window.addEventListener("click", (event) => {
   if (getFormIsActive()) return;
-  // レイキャスターを使ってクリックされた星を判定
-  raycaster.setFromCamera(mouse, camera);
+  if (event.target.closest("#star-popup")) return; // ポップアップ内クリックは無視
 
+  raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(clickableStars);
 
   if (intersects.length > 0) {
     const star = intersects[0].object.userData.linkedStar;
-
-    // 星の色をトグル
-    if (star.material.color.getHex() !== 0xff0000) {
-      star.material.color.set(0xff0000); // 赤色に変更（変更後は戻せない）
-    }
-
-    // クリックした星に関連付けられたURLに遷移
-    const starDataItem = stars.find((s) => s.star === star);
-    if (starDataItem && starDataItem.url) {
-      window.open(starDataItem.url, "_blank"); // 新しいタブでURLを開く
-    }
+    const starDataItem = stars.find(s => s.star === star);
+    if (starDataItem) showPopup(starDataItem);
+  } else {
+    hidePopup();
   }
 });
-
 
 // 右クリックでお気に入りトグル
 window.addEventListener("contextmenu", async (event) => {
@@ -244,32 +236,21 @@ window.addEventListener("contextmenu", async (event) => {
   if (!starDataItem) return;
 
   const user = await getCurrentUser();
-  if (!user) {
-    alert("お気に入りにはログインが必要です");
-    return;
-  }
+  if (!user) { alert("お気に入りにはログインが必要です"); return; }
 
   const result = await toggleFavorite(starDataItem.id);
-  if (result === true) {
-    starDataItem.isFavorited = true;
-    starDataItem.material.color.set(0xFFD700);
-  } else if (result === false) {
-    starDataItem.isFavorited = false;
-    starDataItem.material.color.set(0xffffff);
-  }
+  if (result === true)  { starDataItem.isFavorited = true;  starDataItem.material.color.set(0xFFD700); }
+  if (result === false) { starDataItem.isFavorited = false; starDataItem.material.color.set(0xffffff); }
   refreshUrls();
 });
 
+// ズーム表示
 let prevCameraDistance = camera.position.distanceTo(controls.target);
 let lastZoomPercent = 100;
-const baseZoom = 90; // 初期の Z 位置を基準とした倍率
-
+const baseZoom = 90;
 controls.addEventListener("change", () => {
   const currentDistance = camera.position.distanceTo(controls.target);
-
-  // 距離が明らかに変わっていればズームと判断（回転やパンは距離がほぼ一定）
-  const distanceDiff = Math.abs(currentDistance - prevCameraDistance);
-  if (distanceDiff > 0.05) {
+  if (Math.abs(currentDistance - prevCameraDistance) > 0.05) {
     const zoomPercent = Math.round((baseZoom / currentDistance) * 100);
     if (zoomPercent !== lastZoomPercent) {
       document.getElementById("zoom-display").textContent = `Zoom: ${zoomPercent}%`;
@@ -279,36 +260,54 @@ controls.addEventListener("change", () => {
   }
 });
 
-
+// アニメーションループ（お気に入り星のパルス含む）
 function animate() {
   requestAnimationFrame(animate);
+  const t = Date.now() * 0.0015;
+  stars.forEach(starData => {
+    if (starData.isFavorited && starData.star !== hoveredStar) {
+      const pulse = 1 + 0.18 * Math.sin(t * 1.4 + starData.id * 0.7);
+      starData.star.scale.setScalar(pulse);
+    }
+  });
   firstComposer.render();
   controls.update();
 }
-
 animate();
 
 window.addEventListener("resize", () => {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  camera.aspect = width / height;
+  camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(width, height);
+  renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(0x000000, 0);
-  firstComposer.setSize(width, height);
+  firstComposer.setSize(window.innerWidth, window.innerHeight);
 });
 
-let searchTimeout = null;
-const searchInput = document.getElementById("search-input");
+// === キーボードショートカット ===
+document.addEventListener("keydown", (e) => {
+  const tag = document.activeElement?.tagName?.toLowerCase();
+  const isTyping = tag === "input" || tag === "textarea";
+
+  if (e.key === "/" && !isTyping && !getFormIsActive()) {
+    e.preventDefault();
+    toggleAddForm();
+    setTimeout(() => document.getElementById("search-input")?.focus(), 50);
+  }
+  if (e.key === "Escape") {
+    if (getFormIsActive()) toggleAddForm();
+    hidePopup();
+  }
+});
+
+// === 検索 ===
+const searchInput   = document.getElementById("search-input");
 const searchResults = document.getElementById("search-results");
+
 function displaySearchResults(results) {
   searchResults.innerHTML = "";
-  if (results.length === 0) {
-    searchResults.style.display = "none";
-    return;
-  }
+  if (results.length === 0) { searchResults.style.display = "none"; return; }
   searchResults.style.display = "block";
-  const seen = new Set(); // ← 重複を防ぐ
+  const seen = new Set();
   results.forEach((result) => {
     if (seen.has(result.url)) return;
     seen.add(result.url);
@@ -316,29 +315,22 @@ function displaySearchResults(results) {
     div.className = "search-result-item";
     div.textContent = result.title || result.url;
     div.addEventListener("click", () => {
-      if (typeof highlightStar === "function") {
-        highlightStar(result.url);
-      }
+      highlightStar(result.url);
       setTimeout(() => {
         searchInput.value = "";
         searchResults.style.display = "none";
-      }, 300); // 少し待ってから検索欄を消す（ハイライトが消えないように）
+      }, 300);
     });
     searchResults.appendChild(div);
   });
 }
 
-//検索時の強調表示
 function highlightStar(url) {
-  if (!stars) return;
-  stars.forEach((starData) => {
-    starData.material.color.setHex(0xffffff);
+  stars.forEach(s => {
+    s.material.color.setHex(s.isFavorited ? 0xFFD700 : 0xffffff);
   });
-  const match = stars.find((s) => s.url === url);
-  if (match) {
-    match.material.color.setHex(0xffff00); // ハイライト色
-  }
-
+  const match = stars.find(s => s.url === url);
+  if (match) match.material.color.setHex(0xffff00);
   toggleAddForm();
 }
 
@@ -346,16 +338,11 @@ searchInput.addEventListener("input", (e) => {
   const term = e.target.value.toLowerCase();
   if (!term) {
     searchResults.style.display = "none";
-    stars?.forEach((starData) => {
-      starData.material.color.setHex(0xffffff);
-    });
+    stars.forEach(s => s.material.color.setHex(s.isFavorited ? 0xFFD700 : 0xffffff));
     return;
   }
-  const results =
-    stars?.filter((starData) => {
-      const title = (starData.title || "").toLowerCase();
-      const url = starData.url.toLowerCase();
-      return title.includes(term) || url.includes(term);
-    }) || [];
+  const results = stars.filter(s =>
+    (s.title || "").toLowerCase().includes(term) || s.url.toLowerCase().includes(term)
+  );
   displaySearchResults(results);
 });

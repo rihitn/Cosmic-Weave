@@ -1,4 +1,4 @@
-import { insertUrl } from "./supabase.js";
+import { insertUrl, supabase } from "./supabase.js";
 import { getCurrentUser } from "./auth.js";
 
 function toggleMenu() {
@@ -97,5 +97,36 @@ async function addUrl() {
 
 const addUrlButton = document.querySelector(".addUrl-button");
 addUrlButton.addEventListener("click", addUrl);
+
+// === URL 重複チェック & プレビュー ===
+const urlInput   = document.getElementById("url");
+const urlPreview = document.getElementById("url-preview");
+let checkTimeout = null;
+
+urlInput.addEventListener("input", () => {
+  clearTimeout(checkTimeout);
+  const val = urlInput.value.trim();
+  if (!val || !(val.startsWith("http://") || val.startsWith("https://"))) {
+    urlPreview.textContent = "";
+    urlPreview.className = "url-preview";
+    return;
+  }
+  urlPreview.textContent = "確認中...";
+  urlPreview.className = "url-preview checking";
+  checkTimeout = setTimeout(async () => {
+    const { data } = await supabase
+      .from("websites")
+      .select("id, title")
+      .eq("url", val)
+      .limit(1);
+    if (data && data.length > 0) {
+      urlPreview.textContent = `⚠️ 登録済み: ${data[0].title || val}`;
+      urlPreview.className = "url-preview duplicate";
+    } else {
+      urlPreview.textContent = "✓ 新しいURL";
+      urlPreview.className = "url-preview new-url";
+    }
+  }, 600);
+});
 
 

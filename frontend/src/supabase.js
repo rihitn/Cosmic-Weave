@@ -112,10 +112,13 @@ async function loadUrls() {
 
   const urlList = document.getElementById("url-list");
   urlList.innerHTML = "";
-  const urlCounter = document.querySelector(".url-counter");
-  if (urlCounter) {
-    urlCounter.textContent = `URL数: ${data.length}`;
-  }
+
+  // HUD stats
+  const myStars = session?.user ? data.filter(r => r.added_by === session.user.id).length : 0;
+  const el = (sel) => document.querySelector(sel);
+  if (el(".url-counter"))      el(".url-counter").textContent      = `Stars: ${data.length}`;
+  if (el(".my-stars-counter")) el(".my-stars-counter").textContent = `My Stars: ${myStars}`;
+  if (el(".fav-counter"))      el(".fav-counter").textContent      = `Favorites: ${favIds.size}`;
 
   data.forEach((urlRecord) => {
     const isFav = favIds.has(urlRecord.id);
