@@ -5,7 +5,7 @@ FROM python:3.13
 WORKDIR /app
 
 # 3. 必要なファイルをコピー
-COPY requirements.txt .
+COPY backend/requirements.txt .
 COPY backend/ ./backend/
 
 # 4. 必要なライブラリをインストール
